@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Special Offers — Nureva Fashion</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="topbar">Cash on Delivery Nationwide &nbsp;•&nbsp; Order via Facebook or our website</div>
+
+<header class="site-header">
+  <div class="header-inner container">
+    <a href="index.html" class="logo">Nureva <span>Fashion</span></a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="products.html">All Products</a>
+      <a href="products.html?filter=new">New Arrivals</a>
+      <a href="offers.html" class="active">Offers</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" id="searchToggle" aria-label="Search">🔍</button>
+      <a class="icon-btn" href="cart.html" style="position:relative" aria-label="Cart">
+        🛍️
+        <span id="cartCount" style="display:none;position:absolute;top:-2px;right:-2px;background:var(--gold);color:var(--primary);border-radius:50%;width:17px;height:17px;font-size:0.65rem;align-items:center;justify-content:center;font-weight:700;">0</span>
+      </a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+    </div>
+  </div>
+  <div class="search-panel" id="searchPanel">
+    <div class="container">
+      <input type="text" id="searchInput" placeholder="Search products...">
+      <button id="searchGo">Search</button>
+    </div>
+    <div id="searchResults"></div>
+  </div>
+</header>
+
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<nav class="nav-drawer" id="navDrawer">
+  <button class="drawer-close" id="drawerClose">✕</button>
+  <a href="index.html">Home</a>
+  <a href="products.html">All Products</a>
+  <a href="products.html?filter=new">New Arrivals</a>
+  <a href="offers.html">Offers</a>
+  <a href="products.html?cat=Burqa">Burqa</a>
+  <a href="products.html?cat=Three-Piece">Three-Piece</a>
+  <a href="products.html?cat=Hijab">Hijab</a>
+  <a href="products.html?cat=Abaya">Abaya</a>
+  <a href="contact.html">Contact</a>
+  <a data-fb-link href="#" target="_blank" rel="noopener">Facebook Page</a>
+</nav>
+
+<div class="page-hero" style="background:linear-gradient(120deg,var(--primary),var(--primary-light))">
+  <div class="container">
+    <h1>Special Offers</h1>
+    <p>Limited-time discounted prices — shop now</p>
+  </div>
+</div>
+
+<div class="container">
+  <section>
+    <div class="product-grid" id="offerGrid"></div>
+  </section>
+</div>
+
+<footer id="siteFooter"></footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/site.js"></script>
+<script>
+  function renderOffersPage() {
+    applySettings();
+    renderProductGrid("offerGrid", NurevaStore.Products.onOffer(), "No offers running right now. New offers coming soon!");
+    renderFooter();
+  }
+  NurevaStore.ready.then(renderOffersPage);
+  NurevaStore.onChange(renderOffersPage);
+</script>
+</body>
+</html>

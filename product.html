@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitleTag">Product — Nureva Fashion</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="topbar">Cash on Delivery Nationwide &nbsp;•&nbsp; Order via Facebook or our website</div>
+
+<header class="site-header">
+  <div class="header-inner container">
+    <a href="index.html" class="logo">Nureva <span>Fashion</span></a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="products.html">All Products</a>
+      <a href="products.html?filter=new">New Arrivals</a>
+      <a href="offers.html">Offers</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" id="searchToggle" aria-label="Search">🔍</button>
+      <a class="icon-btn" href="cart.html" style="position:relative" aria-label="Cart">
+        🛍️
+        <span id="cartCount" style="display:none;position:absolute;top:-2px;right:-2px;background:var(--gold);color:var(--primary);border-radius:50%;width:17px;height:17px;font-size:0.65rem;align-items:center;justify-content:center;font-weight:700;">0</span>
+      </a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+    </div>
+  </div>
+  <div class="search-panel" id="searchPanel">
+    <div class="container">
+      <input type="text" id="searchInput" placeholder="Search products...">
+      <button id="searchGo">Search</button>
+    </div>
+    <div id="searchResults"></div>
+  </div>
+</header>
+
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<nav class="nav-drawer" id="navDrawer">
+  <button class="drawer-close" id="drawerClose">✕</button>
+  <a href="index.html">Home</a>
+  <a href="products.html">All Products</a>
+  <a href="products.html?filter=new">New Arrivals</a>
+  <a href="offers.html">Offers</a>
+  <a href="products.html?cat=Burqa">Burqa</a>
+  <a href="products.html?cat=Three-Piece">Three-Piece</a>
+  <a href="products.html?cat=Hijab">Hijab</a>
+  <a href="products.html?cat=Abaya">Abaya</a>
+  <a href="contact.html">Contact</a>
+  <a data-fb-link href="#" target="_blank" rel="noopener">Facebook Page</a>
+</nav>
+
+<div class="container">
+  <div class="breadcrumb" id="breadcrumb"></div>
+  <div class="pd-wrap" id="pdWrap"></div>
+</div>
+
+<div class="container"><div class="stitch"></div></div>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <h2>You Might Also Like</h2>
+    </div>
+    <div class="product-grid" id="relatedGrid"></div>
+  </div>
+</section>
+
+<footer id="siteFooter"></footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/site.js"></script>
+<script>
+  let selSize, selColor, qty = 1, currentProduct = null;
+
+  function renderProductPage() {
+    applySettings();
+    const id = new URLSearchParams(location.search).get("id");
+    const p = NurevaStore.Products.get(id);
+    const pdWrap = document.getElementById("pdWrap");
+
+    if (!p) {
+      pdWrap.innerHTML = `<div class="empty-state"><h3>Product not found</h3><p><a href="products.html" class="btn btn-primary" style="margin-top:14px">Browse All Products</a></p></div>`;
+      renderFooter();
+      return;
+    }
+    currentProduct = p;
+    document.getElementById("pageTitleTag").textContent = p.name + " — Nureva Fashion";
+    document.getElementById("breadcrumb").innerHTML =
+      `<a href="index.html">Home</a> / <a href="products.html?cat=${encodeURIComponent(p.category)}">${p.category}</a> / ${p.name}`;
+
+    const offer = !!p.offerPrice;
+    if (!selSize || !p.sizes.includes(selSize)) selSize = p.sizes[0];
+    if (!selColor || !p.colors.includes(selColor)) selColor = p.colors[0];
+
+    pdWrap.innerHTML = `
+      <div class="pd-gallery">
+        <div class="pd-gallery-main"><img id="mainImg" src="${p.images[0]}" alt="${p.name}"></div>
+        <div class="pd-thumbs">
+          ${p.images.map((img, i) => `<img src="${img}" class="${i === 0 ? "active" : ""}" data-i="${i}">`).join("")}
+        </div>
+      </div>
+      <div class="pd-info">
+        <div class="pd-cat">${p.category}</div>
+        <h1>${p.name}</h1>
+        <div class="pd-price">
+          <span class="price-now">${formatTaka(offer ? p.offerPrice : p.price)}</span>
+          ${offer ? `<span class="price-old">${formatTaka(p.price)}</span>` : ""}
+        </div>
+        <div class="pd-stock ${p.stock < 5 ? "low" : ""}">${p.stock > 0 ? `In stock (${p.stock} available)` : "Out of stock"}</div>
+
+        <div class="option-group">
+          <label>Choose Size</label>
+          <div class="chip-row" id="sizeChips">
+            ${p.sizes.map((s, i) => `<button class="chip ${s === selSize ? "selected" : ""}" data-size="${s}">${s}</button>`).join("")}
+          </div>
+        </div>
+        <div class="option-group">
+          <label>Choose Colour</label>
+          <div class="chip-row" id="colorChips">
+            ${p.colors.map((c, i) => `<button class="chip ${c === selColor ? "selected" : ""}" data-color="${c}">${c}</button>`).join("")}
+          </div>
+        </div>
+        <div class="option-group">
+          <label>Quantity</label>
+          <div class="qty-row">
+            <button id="qtyMinus">−</button>
+            <span id="qtyVal">${qty}</span>
+            <button id="qtyPlus">+</button>
+          </div>
+        </div>
+
+        <div class="pd-actions">
+          <button class="btn btn-outline" style="border-color:var(--primary);color:var(--primary)" id="addCartBtn">Add to Cart</button>
+          <a class="btn btn-primary" id="buyNowBtn" href="checkout.html">Buy Now</a>
+        </div>
+        <a class="btn btn-gold btn-block" id="waBtn" href="#" target="_blank" rel="noopener" style="margin-bottom:26px">📱 Order via WhatsApp</a>
+
+        <div class="pd-desc">
+          <h4>Description</h4>
+          <p>${p.description}</p>
+        </div>
+      </div>
+    `;
+
+    document.querySelectorAll(".pd-thumbs img").forEach(t => t.addEventListener("click", () => {
+      document.getElementById("mainImg").src = t.src;
+      document.querySelectorAll(".pd-thumbs img").forEach(x => x.classList.remove("active"));
+      t.classList.add("active");
+    }));
+    document.querySelectorAll("#sizeChips .chip").forEach(c => c.addEventListener("click", () => {
+      document.querySelectorAll("#sizeChips .chip").forEach(x => x.classList.remove("selected"));
+      c.classList.add("selected"); selSize = c.dataset.size;
+    }));
+    document.querySelectorAll("#colorChips .chip").forEach(c => c.addEventListener("click", () => {
+      document.querySelectorAll("#colorChips .chip").forEach(x => x.classList.remove("selected"));
+      c.classList.add("selected"); selColor = c.dataset.color;
+    }));
+    document.getElementById("qtyMinus").addEventListener("click", () => { if (qty > 1) qty--; document.getElementById("qtyVal").textContent = qty; });
+    document.getElementById("qtyPlus").addEventListener("click", () => { qty++; document.getElementById("qtyVal").textContent = qty; });
+
+    function cartItem() {
+      return { productId: p.id, name: p.name, image: p.images[0], price: offer ? p.offerPrice : p.price, size: selSize, color: selColor, qty };
+    }
+    document.getElementById("addCartBtn").addEventListener("click", () => addToCart(cartItem()));
+    document.getElementById("buyNowBtn").addEventListener("click", (e) => {
+      e.preventDefault();
+      addToCart(cartItem());
+      location.href = "checkout.html";
+    });
+
+    const settings = NurevaStore.Settings.get();
+    document.getElementById("waBtn").href = settings.whatsapp
+      ? `https://wa.me/${settings.whatsapp}?text=${encodeURIComponent("I would like to order: " + p.name + " (Size: " + selSize + ", Colour: " + selColor + ")")}`
+      : (settings.facebook || "#");
+
+    renderProductGrid("relatedGrid", NurevaStore.Products.byCategory(p.category).filter(x => x.id !== p.id).slice(0, 4), "");
+    renderFooter();
+  }
+
+  NurevaStore.ready.then(renderProductPage);
+  NurevaStore.onChange(renderProductPage);
+</script>
+</body>
+</html>

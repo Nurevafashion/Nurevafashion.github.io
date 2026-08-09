@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — Nureva Fashion</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .contact-wrap { display:grid; grid-template-columns:1fr 1fr; gap:40px; padding:40px 0 60px; }
+  .contact-card { background:var(--white); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow); margin-bottom:16px; }
+  .contact-card h4 { font-family:var(--font-display); color:var(--primary); margin-bottom:6px; }
+  @media (max-width:860px){ .contact-wrap{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">Cash on Delivery Nationwide</div>
+<header class="site-header">
+  <div class="header-inner container">
+    <a href="index.html" class="logo">Nureva <span>Fashion</span></a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a><a href="products.html">All Products</a><a href="offers.html">Offers</a><a href="contact.html" class="active">Contact</a>
+    </nav>
+    <div class="header-actions"><button class="menu-toggle" id="menuToggle">☰</button></div>
+  </div>
+</header>
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<nav class="nav-drawer" id="navDrawer">
+  <button class="drawer-close" id="drawerClose">✕</button>
+  <a href="index.html">Home</a><a href="products.html">All Products</a><a href="offers.html">Offers</a><a href="contact.html">Contact</a>
+</nav>
+
+<div class="page-hero"><div class="container"><h1>Get in Touch</h1><p>Have a question or need help with an order? Reach out to us.</p></div></div>
+
+<div class="container">
+  <div class="contact-wrap">
+    <div>
+      <div class="contact-card">
+        <h4>Address</h4>
+        <p data-site-address>Dhaka, Bangladesh</p>
+      </div>
+      <div class="contact-card">
+        <h4>Phone</h4>
+        <p><a data-site-phone href="#">Contact number coming soon</a></p>
+      </div>
+      <div class="contact-card">
+        <h4>Facebook</h4>
+        <p><a data-fb-link href="#" target="_blank" rel="noopener">facebook.com/Nurevafashion</a></p>
+      </div>
+    </div>
+    <form class="contact-card" id="contactForm">
+      <div class="form-group"><label>Your Name</label><input type="text" required></div>
+      <div class="form-group"><label>Mobile Number</label><input type="tel" required></div>
+      <div class="form-group"><label>Message</label><textarea required placeholder="Write your question..."></textarea></div>
+      <button type="submit" class="btn btn-primary btn-block">Send Message</button>
+    </form>
+  </div>
+</div>
+
+<footer id="siteFooter"></footer>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/site.js"></script>
+<script>
+  NurevaStore.ready.then(() => { applySettings(); renderFooter(); });
+  document.getElementById("contactForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    toast("Your message has been sent. Thank you!");
+    e.target.reset();
+  });
+</script>
+</body>
+</html>

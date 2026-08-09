@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout — Nureva Fashion</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .checkout-wrap { display:grid; grid-template-columns:1.4fr 1fr; gap:30px; }
+  .order-box { background:var(--white); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); height:fit-content; }
+  .order-box .row { display:flex; justify-content:space-between; padding:8px 0; font-size:0.92rem; }
+  .order-box .total { font-weight:700; color:var(--primary); border-top:1px dashed var(--gold); padding-top:12px; font-size:1.1rem; }
+  .radio-row { display:flex; gap:14px; }
+  .radio-card { flex:1; border:1.5px solid rgba(59,31,50,0.2); border-radius:var(--radius); padding:12px 14px; cursor:pointer; }
+  .radio-card.selected { border-color:var(--primary); background:rgba(59,31,50,0.05); }
+  @media (max-width:900px){ .checkout-wrap{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">Cash on Delivery Nationwide</div>
+<header class="site-header">
+  <div class="header-inner container">
+    <a href="index.html" class="logo">Nureva <span>Fashion</span></a>
+    <nav class="main-nav"><a href="index.html">Home</a><a href="products.html">All Products</a></nav>
+    <div class="header-actions"><button class="menu-toggle" id="menuToggle">☰</button></div>
+  </div>
+</header>
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<nav class="nav-drawer" id="navDrawer">
+  <button class="drawer-close" id="drawerClose">✕</button>
+  <a href="index.html">Home</a><a href="products.html">All Products</a><a href="contact.html">Contact</a>
+</nav>
+
+<div class="page-hero"><div class="container"><h1>Checkout</h1></div></div>
+
+<div class="container" style="padding:36px 20px" id="checkoutContainer">
+  <div class="checkout-wrap">
+    <form id="checkoutForm">
+      <div class="form-group"><label>Full Name *</label><input type="text" id="custName" required></div>
+      <div class="form-row">
+        <div class="form-group"><label>Mobile Number *</label><input type="tel" id="custPhone" required placeholder="01XXXXXXXXX"></div>
+        <div class="form-group"><label>District *</label><input type="text" id="custDistrict" required></div>
+      </div>
+      <div class="form-group"><label>Full Address *</label><textarea id="custAddress" required></textarea></div>
+      <div class="form-group">
+        <label>Delivery Zone</label>
+        <div class="radio-row">
+          <label class="radio-card selected"><input type="radio" name="zone" value="inside" checked style="margin-right:6px">Inside Dhaka</label>
+          <label class="radio-card"><input type="radio" name="zone" value="outside" style="margin-right:6px">Outside Dhaka</label>
+        </div>
+      </div>
+      <div class="form-group"><label>Additional Note (optional)</label><textarea id="custNote" placeholder="Any special instructions..."></textarea></div>
+      <button type="submit" class="btn btn-primary btn-block">Confirm Order (Cash on Delivery)</button>
+    </form>
+    <div class="order-box">
+      <h3 style="font-family:var(--font-display);color:var(--primary);margin-bottom:14px">Order Summary</h3>
+      <div id="orderItems"></div>
+      <div class="row"><span>Subtotal</span><span id="ckSubtotal">৳0</span></div>
+      <div class="row"><span>Delivery Fee</span><span id="ckDelivery">৳0</span></div>
+      <div class="row total"><span>Total Payable</span><span id="ckTotal">৳0</span></div>
+    </div>
+  </div>
+</div>
+
+<footer id="siteFooter"></footer>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/site.js"></script>
+<script>
+  NurevaStore.ready.then(() => {
+    applySettings(); renderFooter();
+    const cart = getCart();
+    const settings = NurevaStore.Settings.get();
+    const container = document.getElementById("checkoutContainer");
+
+    if (!cart.length) {
+      container.innerHTML = `<div class="empty-state"><h3>Your cart is empty</h3><p>Add products to your cart before checking out.</p><a href="products.html" class="btn btn-primary" style="margin-top:14px">Browse Products</a></div>`;
+      return;
+    }
+    document.getElementById("orderItems").innerHTML = cart.map(c => `
+      <div class="row"><span>${c.name} (${c.size}/${c.color}) × ${c.qty}</span><span>${formatTaka(c.price * c.qty)}</span></div>
+    `).join("");
+    const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
+    function updateTotals() {
+      const zone = document.querySelector('input[name="zone"]:checked').value;
+      const fee = zone === "inside" ? (settings.deliveryInsideDhaka || 70) : (settings.deliveryOutsideDhaka || 130);
+      document.getElementById("ckSubtotal").textContent = formatTaka(subtotal);
+      document.getElementById("ckDelivery").textContent = formatTaka(fee);
+      document.getElementById("ckTotal").textContent = formatTaka(subtotal + fee);
+      return fee;
+    }
+    let fee = updateTotals();
+    document.querySelectorAll('input[name="zone"]').forEach(r => r.addEventListener("change", () => {
+      document.querySelectorAll(".radio-card").forEach(c => c.classList.remove("selected"));
+      r.closest(".radio-card").classList.add("selected");
+      fee = updateTotals();
+    }));
+
+    document.getElementById("checkoutForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const order = {
+        customer: {
+          name: document.getElementById("custName").value,
+          phone: document.getElementById("custPhone").value,
+          district: document.getElementById("custDistrict").value,
+          address: document.getElementById("custAddress").value,
+          note: document.getElementById("custNote").value,
+        },
+        items: cart,
+        deliveryFee: fee,
+        subtotal,
+        total: subtotal + fee,
+        paymentMethod: "Cash on Delivery",
+      };
+      NurevaStore.Orders.add(order).then(() => {
+        saveCart([]);
+        container.innerHTML = `<div class="empty-state">
+          <h3>🎉 Order placed successfully!</h3>
+          <p>We'll contact you soon on the number you provided.</p>
+          <a href="index.html" class="btn btn-primary" style="margin-top:14px">Back to Home</a>
+        </div>`;
+      }).catch(err => alert(err.message));
+    });
+  });
+</script>
+</body>
+</html>

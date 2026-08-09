@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Products — Nureva Fashion</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="topbar">Cash on Delivery Nationwide &nbsp;•&nbsp; Order via Facebook or our website</div>
+
+<header class="site-header">
+  <div class="header-inner container">
+    <a href="index.html" class="logo">Nureva <span>Fashion</span></a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="products.html" class="active">All Products</a>
+      <a href="products.html?filter=new">New Arrivals</a>
+      <a href="offers.html">Offers</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" id="searchToggle" aria-label="Search">🔍</button>
+      <a class="icon-btn" href="cart.html" style="position:relative" aria-label="Cart">
+        🛍️
+        <span id="cartCount" style="display:none;position:absolute;top:-2px;right:-2px;background:var(--gold);color:var(--primary);border-radius:50%;width:17px;height:17px;font-size:0.65rem;align-items:center;justify-content:center;font-weight:700;">0</span>
+      </a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+    </div>
+  </div>
+  <div class="search-panel" id="searchPanel">
+    <div class="container">
+      <input type="text" id="searchInput" placeholder="Search products...">
+      <button id="searchGo">Search</button>
+    </div>
+    <div id="searchResults"></div>
+  </div>
+</header>
+
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<nav class="nav-drawer" id="navDrawer">
+  <button class="drawer-close" id="drawerClose">✕</button>
+  <a href="index.html">Home</a>
+  <a href="products.html">All Products</a>
+  <a href="products.html?filter=new">New Arrivals</a>
+  <a href="offers.html">Offers</a>
+  <a href="products.html?cat=Burqa">Burqa</a>
+  <a href="products.html?cat=Three-Piece">Three-Piece</a>
+  <a href="products.html?cat=Hijab">Hijab</a>
+  <a href="products.html?cat=Abaya">Abaya</a>
+  <a href="contact.html">Contact</a>
+  <a data-fb-link href="#" target="_blank" rel="noopener">Facebook Page</a>
+</nav>
+
+<div class="page-hero">
+  <div class="container">
+    <h1 id="pageTitle">All Products</h1>
+    <p>Browse the full Nureva Fashion collection</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="filter-bar" id="filterBar"></div>
+  <section>
+    <div class="product-grid" id="productGrid"></div>
+  </section>
+</div>
+
+<footer id="siteFooter"></footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/site.js"></script>
+<script>
+  function renderProductsPage() {
+    applySettings();
+    const params = new URLSearchParams(location.search);
+    const catParam = params.get("cat");
+    const filterParam = params.get("filter");
+
+    const chips = [{ label: "All", value: "" }, ...NurevaStore.CATEGORIES.map(c => ({ label: c, value: c }))];
+    document.getElementById("filterBar").innerHTML = chips.map(c => `
+      <a class="filter-chip ${catParam === c.value && c.value !== "" ? "active" : (!catParam && c.value === "" && !filterParam ? "active" : "")}"
+         href="${c.value ? "products.html?cat=" + encodeURIComponent(c.value) : "products.html"}">${c.label}</a>
+    `).join("");
+
+    let list = NurevaStore.Products.all();
+    let title = "All Products";
+    if (catParam) { list = NurevaStore.Products.byCategory(catParam); title = catParam; }
+    else if (filterParam === "new") { list = NurevaStore.Products.newArrivals(); title = "New Arrivals"; }
+    else if (filterParam === "offer") { list = NurevaStore.Products.onOffer(); title = "Offers"; }
+
+    document.getElementById("pageTitle").textContent = title;
+    renderProductGrid("productGrid", list, "No products have been added to this category yet.");
+    renderFooter();
+  }
+  NurevaStore.ready.then(renderProductsPage);
+  NurevaStore.onChange(renderProductsPage);
+</script>
+</body>
+</html>

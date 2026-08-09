@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nureva Fashion — Where Modesty Meets Elegance</title>
+<meta name="description" content="Nureva Fashion — premium Burqa, Three-Piece, Hijab and Abaya collections online. Cash on delivery nationwide.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="topbar">Cash on Delivery Nationwide &nbsp;•&nbsp; Order via Facebook or our website</div>
+
+<header class="site-header">
+  <div class="header-inner container">
+    <a href="index.html" class="logo">Nureva <span>Fashion</span></a>
+    <nav class="main-nav">
+      <a href="index.html" class="active">Home</a>
+      <a href="products.html">All Products</a>
+      <a href="products.html?filter=new">New Arrivals</a>
+      <a href="offers.html">Offers</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" id="searchToggle" aria-label="Search">🔍</button>
+      <a class="icon-btn" href="cart.html" style="position:relative" aria-label="Cart">
+        🛍️
+        <span id="cartCount" style="display:none;position:absolute;top:-2px;right:-2px;background:var(--gold);color:var(--primary);border-radius:50%;width:17px;height:17px;font-size:0.65rem;align-items:center;justify-content:center;font-weight:700;">0</span>
+      </a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+    </div>
+  </div>
+  <div class="search-panel" id="searchPanel">
+    <div class="container">
+      <input type="text" id="searchInput" placeholder="Search products... (e.g. Burqa, Hijab)">
+      <button id="searchGo">Search</button>
+    </div>
+    <div id="searchResults"></div>
+  </div>
+</header>
+
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<nav class="nav-drawer" id="navDrawer">
+  <button class="drawer-close" id="drawerClose">✕</button>
+  <a href="index.html">Home</a>
+  <a href="products.html">All Products</a>
+  <a href="products.html?filter=new">New Arrivals</a>
+  <a href="offers.html">Offers</a>
+  <a href="products.html?cat=Burqa">Burqa</a>
+  <a href="products.html?cat=Three-Piece">Three-Piece</a>
+  <a href="products.html?cat=Hijab">Hijab</a>
+  <a href="products.html?cat=Abaya">Abaya</a>
+  <a href="contact.html">Contact</a>
+  <a data-fb-link href="#" target="_blank" rel="noopener">Facebook Page</a>
+</nav>
+
+<div class="news-ticker" id="newsTicker">
+  <div class="news-ticker-track"></div>
+</div>
+
+<section class="hero" style="padding:0">
+  <div id="heroSlider"></div>
+  <div class="hero-content">
+    <div class="eyebrow">Nureva Fashion</div>
+    <h1 data-tagline>Where Modesty Meets Elegance</h1>
+    <p>Premium collections of Burqa, Three-Piece, Hijab and Abaya — now at your fingertips.</p>
+    <div>
+      <a href="products.html" class="btn btn-gold">Shop Collection</a>
+      <a href="offers.html" class="btn btn-outline" style="margin-left:12px">View Offers</a>
+    </div>
+  </div>
+  <div class="hero-dots" id="heroDots"></div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <h2>Shop by Category</h2>
+      <p>Choose your favourite category</p>
+    </div>
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+</section>
+
+<div class="container"><div class="stitch"></div></div>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <h2>New Arrivals</h2>
+      <p>Freshly added to the collection</p>
+    </div>
+    <div class="product-grid" id="newArrivalsGrid"></div>
+  </div>
+</section>
+
+<div class="container"><div class="stitch"></div></div>
+
+<section style="background:var(--white)">
+  <div class="container">
+    <div class="section-head">
+      <h2>Special Offers</h2>
+      <p>Limited-time discounted prices</p>
+    </div>
+    <div class="product-grid" id="offersGrid"></div>
+    <div style="text-align:center;margin-top:30px">
+      <a href="offers.html" class="btn btn-primary">View All Offers</a>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="stitch"></div></div>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <h2>Popular Picks</h2>
+      <p>Our customers' favourite selections</p>
+    </div>
+    <div class="product-grid" id="featuredGrid"></div>
+  </div>
+</section>
+
+<footer id="siteFooter"></footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/site.js"></script>
+<script>
+  function renderHome() {
+    applySettings();
+    renderNewsTicker();
+    initHeroSlider();
+
+    const catImages = {};
+    NurevaStore.CATEGORIES.forEach(c => {
+      const p = NurevaStore.Products.byCategory(c)[0];
+      catImages[c] = p ? p.images[0] : NurevaStore.placeholderImage(c);
+    });
+    document.getElementById("catGrid").innerHTML = NurevaStore.CATEGORIES.map(c => `
+      <a class="cat-card" href="products.html?cat=${encodeURIComponent(c)}">
+        <img src="${catImages[c]}" alt="${c}">
+        <div class="label">${c}</div>
+      </a>
+    `).join("");
+
+    renderProductGrid("newArrivalsGrid", NurevaStore.Products.newArrivals().slice(0, 4), "No new products yet");
+    renderProductGrid("offersGrid", NurevaStore.Products.onOffer().slice(0, 4), "No active offers right now");
+    renderProductGrid("featuredGrid", NurevaStore.Products.featured().slice(0, 4), "No products yet");
+    renderFooter();
+  }
+  NurevaStore.ready.then(renderHome);
+  NurevaStore.onChange(renderHome);
+</script>
+</body>
+</html>
