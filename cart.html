@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cart — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="style.css">
 <style>
   .cart-row { display:flex; gap:16px; align-items:center; background:var(--white); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow); margin-bottom:14px; }
   .cart-row img { width:64px; height:78px; object-fit:cover; border-radius:3px; }
@@ -63,9 +63,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="js/firebase-config.js"></script>
-<script src="js/store.js"></script>
-<script src="js/site.js"></script>
+<script src="firebase-config.js"></script>
+<script src="store.js"></script>
+<script src="site.js"></script>
 <script>
   function renderCart() {
     const cart = getCart();
