@@ -4,17 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nureva Fashion — Where Modesty Meets Elegance</title>
-<meta name="description" content="Nureva Fashion — premium Burqa, Three-Piece, Hijab and Abaya collections online. Cash on delivery nationwide.">
+<meta name="description" content="Nureva Fashion — premium Burqa, Three-Piece, Hijab and Panjabi collections online. Cash on delivery nationwide.">
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="topbar">Cash on Delivery Nationwide &nbsp;•&nbsp; Order via Facebook or our website</div>
-
 <header class="site-header">
   <div class="header-inner container">
-    <a href="index.html" class="logo">Nureva <span>Fashion</span></a>
+    <a href="index.html" class="logo"><img src="logo.png" alt="Nureva Fashion" class="logo-img"><span class="logo-text">Nureva <span>Fashion</span></span></a>
     <nav class="main-nav">
       <a href="index.html" class="active">Home</a>
       <a href="products.html">All Products</a>
@@ -50,7 +48,7 @@
   <a href="products.html?cat=Burqa">Burqa</a>
   <a href="products.html?cat=Three-Piece">Three-Piece</a>
   <a href="products.html?cat=Hijab">Hijab</a>
-  <a href="products.html?cat=Abaya">Abaya</a>
+  <a href="products.html?cat=Panjabi">Panjabi</a>
   <a href="contact.html">Contact</a>
   <a data-fb-link href="#" target="_blank" rel="noopener">Facebook Page</a>
 </nav>
@@ -62,16 +60,24 @@
 <section class="hero" style="padding:0">
   <div id="heroSlider"></div>
   <div class="hero-content">
-    <div class="eyebrow">Nureva Fashion</div>
-    <h1 data-tagline>Where Modesty Meets Elegance</h1>
-    <p>Premium collections of Burqa, Three-Piece, Hijab and Abaya — now at your fingertips.</p>
     <div>
-      <a href="products.html" class="btn btn-gold">Shop Collection</a>
-      <a href="offers.html" class="btn btn-outline" style="margin-left:12px">View Offers</a>
+      <a href="products.html" class="btn btn-outline btn-sm">Shop Collection</a>
     </div>
   </div>
   <div class="hero-dots" id="heroDots"></div>
 </section>
+
+<section id="newArrivalsSection">
+  <div class="container">
+    <div class="section-head">
+      <h2>New Arrivals</h2>
+      <p>Freshly added to the collection</p>
+    </div>
+    <div class="product-grid" id="newArrivalsGrid"></div>
+  </div>
+</section>
+
+<div class="container"><div class="stitch"></div></div>
 
 <section>
   <div class="container">
@@ -85,19 +91,7 @@
 
 <div class="container"><div class="stitch"></div></div>
 
-<section>
-  <div class="container">
-    <div class="section-head">
-      <h2>New Arrivals</h2>
-      <p>Freshly added to the collection</p>
-    </div>
-    <div class="product-grid" id="newArrivalsGrid"></div>
-  </div>
-</section>
-
-<div class="container"><div class="stitch"></div></div>
-
-<section style="background:var(--white)">
+<section style="background:var(--white)" id="offersSection">
   <div class="container">
     <div class="section-head">
       <h2>Special Offers</h2>
@@ -112,7 +106,7 @@
 
 <div class="container"><div class="stitch"></div></div>
 
-<section>
+<section id="featuredSection">
   <div class="container">
     <div class="section-head">
       <h2>Popular Picks</h2>
@@ -121,6 +115,8 @@
     <div class="product-grid" id="featuredGrid"></div>
   </div>
 </section>
+
+<div class="topbar">Cash on Delivery Nationwide &nbsp;•&nbsp; Order via Facebook or our website</div>
 
 <footer id="siteFooter"></footer>
 
@@ -148,10 +144,24 @@
       </a>
     `).join("");
 
-    renderProductGrid("newArrivalsGrid", NurevaStore.Products.newArrivals().slice(0, 4), "No new products yet");
-    renderProductGrid("offersGrid", NurevaStore.Products.onOffer().slice(0, 4), "No active offers right now");
-    renderProductGrid("featuredGrid", NurevaStore.Products.featured().slice(0, 4), "No products yet");
-    renderFooter();
+    const newArrivals = NurevaStore.Products.newArrivals().slice(0, 4);
+    const onOffer = NurevaStore.Products.onOffer().slice(0, 4);
+    const featured = NurevaStore.Products.featured().slice(0, 4);
+
+    const newArrivalsSection = document.getElementById("newArrivalsSection");
+    const offersSection = document.getElementById("offersSection");
+    const featuredSection = document.getElementById("featuredSection");
+
+    if (newArrivals.length) { newArrivalsSection.style.display = ""; renderProductGrid("newArrivalsGrid", newArrivals); }
+    else { newArrivalsSection.style.display = "none"; }
+
+    if (onOffer.length) { offersSection.style.display = ""; renderProductGrid("offersGrid", onOffer); }
+    else { offersSection.style.display = "none"; }
+
+    if (featured.length) { featuredSection.style.display = ""; renderProductGrid("featuredGrid", featured); }
+    else { featuredSection.style.display = "none"; }
+
+    renderFooter(true);
   }
   NurevaStore.ready.then(renderHome);
   NurevaStore.onChange(renderHome);
