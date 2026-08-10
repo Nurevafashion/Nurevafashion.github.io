@@ -145,11 +145,11 @@ function addToCart(item) {
   toast("Added to cart");
 }
 function updateCartBadge() {
-  const badge = document.getElementById("cartCount");
-  if (!badge) return;
   const count = getCart().reduce((s, c) => s + c.qty, 0);
-  badge.textContent = count;
-  badge.style.display = count ? "flex" : "none";
+  const badge = document.getElementById("cartCount");
+  if (badge) { badge.textContent = count; badge.style.display = count ? "flex" : "none"; }
+  const bnBadge = document.getElementById("bottomCartCount");
+  if (bnBadge) { bnBadge.textContent = count; bnBadge.style.display = count ? "flex" : "none"; }
 }
 
 /* ---------- settings + footer injection ---------- */
@@ -240,4 +240,30 @@ function initFab() {
   if (window.NurevaStore) { NurevaStore.ready.then(applyFabLinks); NurevaStore.onChange(applyFabLinks); }
 }
 
-document.addEventListener("DOMContentLoaded", () => { initHeader(); initFab(); });
+/* ---------- bottom navigation bar ---------- */
+function initBottomNav() {
+  if (document.getElementById("siteBottomNav")) return;
+  const path = location.pathname.split("/").pop() || "index.html";
+  const nav = document.createElement("nav");
+  nav.id = "siteBottomNav";
+  nav.className = "bottom-nav";
+  nav.innerHTML = `
+    <a href="index.html" class="${path === "index.html" || path === "" ? "active" : ""}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      Home
+    </a>
+    <a href="track-order.html" class="${path === "track-order.html" ? "active" : ""}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      Tracking
+    </a>
+    <a href="cart.html" class="${path === "cart.html" ? "active" : ""}" style="position:relative">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-13z"/><path d="M6 6L4 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+      Cart
+      <span class="bn-badge" id="bottomCartCount">0</span>
+    </a>
+  `;
+  document.body.appendChild(nav);
+  updateCartBadge();
+}
+
+document.addEventListener("DOMContentLoaded", () => { initHeader(); initFab(); initBottomNav(); });

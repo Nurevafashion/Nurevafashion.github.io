@@ -135,6 +135,11 @@ const NurevaStore = (() => {
   /* ---------- Orders ---------- */
   const Orders = {
     all: () => cache.orders,
+    byPhone: (phone) => {
+      const p = (phone || "").trim();
+      if (!p) return [];
+      return cache.orders.filter(o => o.customer && (o.customer.phone || "").trim() === p);
+    },
     add: (order) => db.collection("orders").add({ ...order, date: Date.now(), status: "New" }),
     updateStatus: (id, status) => db.collection("orders").doc(id).update({ status }),
     remove: (id) => db.collection("orders").doc(id).delete(),

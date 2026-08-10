@@ -6,7 +6,7 @@
 <title>Nureva Fashion — Where Modesty Meets Elegance</title>
 <meta name="description" content="Nureva Fashion — premium Burqa, Three-Piece, Hijab and Panjabi collections online. Cash on delivery nationwide.">
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 
@@ -18,15 +18,16 @@
       <a href="products.html">All Products</a>
       <a href="products.html?filter=new">New Arrivals</a>
       <a href="offers.html">Offers</a>
+      <a href="track-order.html">Track Order</a>
       <a href="contact.html">Contact</a>
     </nav>
     <div class="header-actions">
-      <button class="icon-btn" id="searchToggle" aria-label="Search">🔍</button>
-      <a class="icon-btn" href="cart.html" style="position:relative" aria-label="Cart">
-        🛍️
-        <span id="cartCount" style="display:none;position:absolute;top:-2px;right:-2px;background:var(--gold);color:var(--primary);border-radius:50%;width:17px;height:17px;font-size:0.65rem;align-items:center;justify-content:center;font-weight:700;">0</span>
-      </a>
-      <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+      <button class="icon-btn icon-btn-round" id="searchToggle" aria-label="Search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
     </div>
   </div>
   <div class="search-panel" id="searchPanel">
@@ -49,7 +50,8 @@
   <a href="products.html?cat=Three-Piece">Three-Piece</a>
   <a href="products.html?cat=Hijab">Hijab</a>
   <a href="products.html?cat=Panjabi">Panjabi</a>
-  <a href="contact.html">Contact</a>
+  <a href="track-order.html">Track Order</a>
+      <a href="contact.html">Contact</a>
   <a data-fb-link href="#" target="_blank" rel="noopener">Facebook Page</a>
 </nav>
 
@@ -89,33 +91,6 @@
   </div>
 </section>
 
-<div class="container"><div class="stitch"></div></div>
-
-<section style="background:var(--white)" id="offersSection">
-  <div class="container">
-    <div class="section-head">
-      <h2>Special Offers</h2>
-      <p>Limited-time discounted prices</p>
-    </div>
-    <div class="product-grid" id="offersGrid"></div>
-    <div style="text-align:center;margin-top:30px">
-      <a href="offers.html" class="btn btn-primary">View All Offers</a>
-    </div>
-  </div>
-</section>
-
-<div class="container"><div class="stitch"></div></div>
-
-<section id="featuredSection">
-  <div class="container">
-    <div class="section-head">
-      <h2>Popular Picks</h2>
-      <p>Our customers' favourite selections</p>
-    </div>
-    <div class="product-grid" id="featuredGrid"></div>
-  </div>
-</section>
-
 <div class="topbar">Cash on Delivery Nationwide &nbsp;•&nbsp; Order via Facebook or our website</div>
 
 <footer id="siteFooter"></footer>
@@ -123,9 +98,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="firebase-config.js?v=3"></script>
-<script src="store.js?v=3"></script>
-<script src="site.js?v=3"></script>
+<script src="firebase-config.js?v=4"></script>
+<script src="store.js?v=4"></script>
+<script src="site.js?v=4"></script>
 <script>
   function renderHome() {
     applySettings();
@@ -145,21 +120,9 @@
     `).join("");
 
     const newArrivals = NurevaStore.Products.newArrivals().slice(0, 4);
-    const onOffer = NurevaStore.Products.onOffer().slice(0, 4);
-    const featured = NurevaStore.Products.featured().slice(0, 4);
-
     const newArrivalsSection = document.getElementById("newArrivalsSection");
-    const offersSection = document.getElementById("offersSection");
-    const featuredSection = document.getElementById("featuredSection");
-
     if (newArrivals.length) { newArrivalsSection.style.display = ""; renderProductGrid("newArrivalsGrid", newArrivals); }
     else { newArrivalsSection.style.display = "none"; }
-
-    if (onOffer.length) { offersSection.style.display = ""; renderProductGrid("offersGrid", onOffer); }
-    else { offersSection.style.display = "none"; }
-
-    if (featured.length) { featuredSection.style.display = ""; renderProductGrid("featuredGrid", featured); }
-    else { featuredSection.style.display = "none"; }
 
     renderFooter(true);
   }

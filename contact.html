@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contact — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 <style>
   .contact-wrap { display:grid; grid-template-columns:1fr 1fr; gap:40px; padding:40px 0 60px; }
   .contact-card { background:var(--white); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow); margin-bottom:16px; }
@@ -22,13 +22,16 @@
     <nav class="main-nav">
       <a href="index.html">Home</a><a href="products.html">All Products</a><a href="offers.html">Offers</a><a href="contact.html" class="active">Contact</a>
     </nav>
-    <div class="header-actions"><button class="menu-toggle" id="menuToggle">☰</button></div>
+    <div class="header-actions"><button class="menu-toggle" id="menuToggle" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button></div>
   </div>
 </header>
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <nav class="nav-drawer" id="navDrawer">
   <button class="drawer-close" id="drawerClose">✕</button>
-  <a href="index.html">Home</a><a href="products.html">All Products</a><a href="offers.html">Offers</a><a href="contact.html">Contact</a>
+  <a href="index.html">Home</a><a href="products.html">All Products</a><a href="offers.html">Offers</a><a href="track-order.html">Track Order</a>
+      <a href="contact.html">Contact</a>
 </nav>
 
 <div class="page-hero"><div class="container"><h1>Get in Touch</h1><p>Have a question or need help with an order? Reach out to us.</p></div></div>
@@ -62,9 +65,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="firebase-config.js?v=3"></script>
-<script src="store.js?v=3"></script>
-<script src="site.js?v=3"></script>
+<script src="firebase-config.js?v=4"></script>
+<script src="store.js?v=4"></script>
+<script src="site.js?v=4"></script>
 <script>
   NurevaStore.ready.then(() => { applySettings(); renderFooter(); });
   document.getElementById("contactForm").addEventListener("submit", (e) => {
