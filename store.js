@@ -9,7 +9,7 @@
    ============================================================ */
 
 const NurevaStore = (() => {
-  const CATEGORIES = ["Burqa", "Three-Piece", "Hijab", "Abaya"];
+  const CATEGORIES = ["Burqa", "Three-Piece", "Hijab", "Panjabi"];
 
   /* ---------- placeholder image (SVG) ---------- */
   function hashCode(str) { let h = 0; for (let i = 0; i < String(str).length; i++) { h = (h << 5) - h + str.charCodeAt(i); h |= 0; } return h; }
@@ -160,7 +160,7 @@ const NurevaStore = (() => {
       "Burqa": ["Noor Burqa", "Soft Crepe Burqa", "Royal Burqa", "Elegant Burqa"],
       "Three-Piece": ["Georgette Three-Piece", "Cotton Three-Piece", "Premium Three-Piece", "Summer Three-Piece"],
       "Hijab": ["Chiffon Hijab", "Georgette Hijab", "Premium Hijab", "Instant Hijab"],
-      "Abaya": ["Dubai Abaya", "Kuwaiti Abaya", "Nida Abaya", "Plain Abaya"],
+      "Panjabi": ["Cotton Panjabi", "Silk Panjabi", "Eid Panjabi", "Embroidered Panjabi"],
     };
     let id = 1;
     const batch = db.batch();
@@ -184,7 +184,7 @@ const NurevaStore = (() => {
         id++;
       });
     });
-    const bannerLabels = ["Nureva Fashion", "New Collection 2026", "Premium Burqa", "Limited Time Offer", "Exclusive Abaya"];
+    const bannerLabels = ["Nureva Fashion", "New Collection 2026", "Premium Burqa", "Limited Time Offer", "Exclusive Panjabi"];
     batch.set(db.collection("banners").doc("main"), { images: bannerLabels.map((l, i) => placeholderImage(l, "banner" + i)) });
     batch.set(db.collection("settings").doc("general"), defaultSettings(), { merge: true });
     return batch.commit();
