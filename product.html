@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title id="pageTitleTag">Product — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 
@@ -13,7 +13,7 @@
 
 <header class="site-header">
   <div class="header-inner container">
-    <a href="index.html" class="logo">Nureva <span>Fashion</span></a>
+    <a href="index.html" class="logo"><img src="logo.png" alt="Nureva Fashion" class="logo-img"><span class="logo-text">Nureva <span>Fashion</span></span></a>
     <nav class="main-nav">
       <a href="index.html">Home</a>
       <a href="products.html">All Products</a>
@@ -49,7 +49,7 @@
   <a href="products.html?cat=Burqa">Burqa</a>
   <a href="products.html?cat=Three-Piece">Three-Piece</a>
   <a href="products.html?cat=Hijab">Hijab</a>
-  <a href="products.html?cat=Abaya">Abaya</a>
+  <a href="products.html?cat=Panjabi">Panjabi</a>
   <a href="contact.html">Contact</a>
   <a data-fb-link href="#" target="_blank" rel="noopener">Facebook Page</a>
 </nav>
@@ -75,9 +75,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="store.js"></script>
-<script src="site.js"></script>
+<script src="firebase-config.js?v=3"></script>
+<script src="store.js?v=3"></script>
+<script src="site.js?v=3"></script>
 <script>
   let selSize, selColor, qty = 1, currentProduct = null;
 
@@ -103,7 +103,7 @@
 
     pdWrap.innerHTML = `
       <div class="pd-gallery">
-        <div class="pd-gallery-main"><img id="mainImg" src="${p.images[0]}" alt="${p.name}"></div>
+        <div class="pd-gallery-main"><img id="mainImg" src="${p.images[0]}" alt="${p.name}" style="cursor:zoom-in"></div>
         <div class="pd-thumbs">
           ${p.images.map((img, i) => `<img src="${img}" class="${i === 0 ? "active" : ""}" data-i="${i}">`).join("")}
         </div>
@@ -156,6 +156,7 @@
       document.querySelectorAll(".pd-thumbs img").forEach(x => x.classList.remove("active"));
       t.classList.add("active");
     }));
+    document.getElementById("mainImg").addEventListener("click", () => openLightbox(document.getElementById("mainImg").src));
     document.querySelectorAll("#sizeChips .chip").forEach(c => c.addEventListener("click", () => {
       document.querySelectorAll("#sizeChips .chip").forEach(x => x.classList.remove("selected"));
       c.classList.add("selected"); selSize = c.dataset.size;

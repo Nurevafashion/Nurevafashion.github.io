@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkout — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=3">
 <style>
   .checkout-wrap { display:grid; grid-template-columns:1.4fr 1fr; gap:30px; }
   .order-box { background:var(--white); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); height:fit-content; }
@@ -22,7 +22,7 @@
 <div class="topbar">Cash on Delivery Nationwide</div>
 <header class="site-header">
   <div class="header-inner container">
-    <a href="index.html" class="logo">Nureva <span>Fashion</span></a>
+    <a href="index.html" class="logo"><img src="logo.png" alt="Nureva Fashion" class="logo-img"><span class="logo-text">Nureva <span>Fashion</span></span></a>
     <nav class="main-nav"><a href="index.html">Home</a><a href="products.html">All Products</a></nav>
     <div class="header-actions"><button class="menu-toggle" id="menuToggle">☰</button></div>
   </div>
@@ -68,9 +68,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="store.js"></script>
-<script src="site.js"></script>
+<script src="firebase-config.js?v=3"></script>
+<script src="store.js?v=3"></script>
+<script src="site.js?v=3"></script>
 <script>
   NurevaStore.ready.then(() => {
     applySettings(); renderFooter();

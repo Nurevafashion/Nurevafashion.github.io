@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cart — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=3">
 <style>
   .cart-row { display:flex; gap:16px; align-items:center; background:var(--white); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow); margin-bottom:14px; }
   .cart-row img { width:64px; height:78px; object-fit:cover; border-radius:3px; }
   .cart-row .info { flex:1; }
   .cart-row .meta { font-size:0.82rem; color:var(--mauve); }
-  .cart-row .remove { background:none; border:none; color:var(--danger); font-size:1.2rem; }
+  .cart-row .remove { background:rgba(162,59,59,0.1); border:1.5px solid rgba(162,59,59,0.3); color:var(--danger); font-size:1.3rem; width:42px; height:42px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .cart-row .remove:hover { background:var(--danger); color:#fff; border-color:var(--danger); }
   .cart-summary { background:var(--white); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); }
   .cart-summary .row { display:flex; justify-content:space-between; margin-bottom:10px; }
   .cart-summary .total { font-weight:700; font-size:1.15rem; color:var(--primary); border-top:1px dashed var(--gold); padding-top:12px; }
@@ -22,7 +23,7 @@
 <div class="topbar">Cash on Delivery Nationwide &nbsp;•&nbsp; Order via Facebook or our website</div>
 <header class="site-header">
   <div class="header-inner container">
-    <a href="index.html" class="logo">Nureva <span>Fashion</span></a>
+    <a href="index.html" class="logo"><img src="logo.png" alt="Nureva Fashion" class="logo-img"><span class="logo-text">Nureva <span>Fashion</span></span></a>
     <nav class="main-nav">
       <a href="index.html">Home</a>
       <a href="products.html">All Products</a>
@@ -63,9 +64,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="store.js"></script>
-<script src="site.js"></script>
+<script src="firebase-config.js?v=3"></script>
+<script src="store.js?v=3"></script>
+<script src="site.js?v=3"></script>
 <script>
   function renderCart() {
     const cart = getCart();

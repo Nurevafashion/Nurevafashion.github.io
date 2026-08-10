@@ -52,6 +52,25 @@ function initHeader() {
   updateCartBadge();
 }
 
+/* ---------- lightbox (click a cover image to view it full-size) ---------- */
+function openLightbox(src) {
+  let el = document.getElementById("siteLightbox");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "siteLightbox";
+    el.className = "lightbox-overlay";
+    el.innerHTML = `<button class="lightbox-close" aria-label="Close">✕</button><img class="lightbox-img" alt="">`;
+    document.body.appendChild(el);
+    el.addEventListener("click", (e) => { if (e.target === el || e.target.classList.contains("lightbox-close")) closeLightbox(); });
+  }
+  el.querySelector(".lightbox-img").src = src;
+  el.classList.add("open");
+}
+function closeLightbox() {
+  const el = document.getElementById("siteLightbox");
+  if (el) el.classList.remove("open");
+}
+
 /* ---------- hero slider ---------- */
 let _heroInterval = null, _heroCurrent = 0;
 function initHeroSlider() {
@@ -60,11 +79,12 @@ function initHeroSlider() {
   if (!wrap) return;
   const banners = NurevaStore.Banners.all();
   if (!banners.length) { wrap.innerHTML = ""; if (dotsWrap) dotsWrap.innerHTML = ""; return; }
-  wrap.innerHTML = banners.map((src, i) => `<div class="hero-slide ${i === 0 ? "active" : ""}" style="background-image:url('${src}')"></div>`).join("");
+  wrap.innerHTML = banners.map((src, i) => `<div class="hero-slide ${i === 0 ? "active" : ""}" data-src="${src}" style="background-image:url('${src}')"></div>`).join("");
   if (dotsWrap) dotsWrap.innerHTML = banners.map((_, i) => `<button data-i="${i}" class="${i === 0 ? "active" : ""}" aria-label="Slide ${i + 1}"></button>`).join("");
   _heroCurrent = 0;
   const slides = wrap.querySelectorAll(".hero-slide");
   const dots = dotsWrap ? dotsWrap.querySelectorAll("button") : [];
+  slides.forEach(s => { s.style.cursor = "zoom-in"; s.addEventListener("click", () => openLightbox(s.dataset.src)); });
   function show(i) {
     slides.forEach(s => s.classList.remove("active"));
     dots.forEach(d => d.classList.remove("active"));
@@ -72,7 +92,7 @@ function initHeroSlider() {
     if (dots[i]) dots[i].classList.add("active");
     _heroCurrent = i;
   }
-  dots.forEach(d => d.addEventListener("click", () => show(Number(d.dataset.i))));
+  dots.forEach(d => d.addEventListener("click", (e) => { e.stopPropagation(); show(Number(d.dataset.i)); }));
   if (_heroInterval) clearInterval(_heroInterval);
   _heroInterval = setInterval(() => show((_heroCurrent + 1) % slides.length), 3000);
 }
@@ -140,42 +160,84 @@ function applySettings() {
   document.querySelectorAll("[data-site-phone]").forEach(el => { if (s.phone) { el.textContent = s.phone; el.href = "tel:" + s.phone; } });
   document.querySelectorAll("[data-tagline]").forEach(el => el.textContent = s.tagline || "");
 }
-function renderFooter() {
+function renderFooter(minimal) {
   const el = document.getElementById("siteFooter");
   if (!el) return;
   const s = NurevaStore.Settings.get();
-  el.innerHTML = `
-    <div class="container">
-      <div class="footer-grid">
+  const brandCol = `
         <div>
           <div class="foot-logo">Nureva <span>Fashion</span></div>
           <p>${s.tagline || "Where Modesty Meets Elegance"}</p>
-          <p>Your trusted destination for premium Burqa, Three-Piece, Hijab and Abaya.</p>
+          <p>Your trusted destination for premium Burqa, Three-Piece, Hijab and Panjabi.</p>
           <div class="social-row"><a href="${s.facebook || '#'}" target="_blank" rel="noopener" aria-label="Facebook">f</a></div>
-        </div>
+        </div>`;
+  const shopCol = `
         <div>
           <h4>Shop</h4>
           <a href="products.html">All Products</a>
           <a href="products.html?filter=new">New Arrivals</a>
           <a href="offers.html">Offers</a>
-        </div>
+        </div>`;
+  const catCol = `
         <div>
           <h4>Categories</h4>
           <a href="products.html?cat=Burqa">Burqa</a>
           <a href="products.html?cat=Three-Piece">Three-Piece</a>
           <a href="products.html?cat=Hijab">Hijab</a>
-          <a href="products.html?cat=Abaya">Abaya</a>
-        </div>
+          <a href="products.html?cat=Panjabi">Panjabi</a>
+        </div>`;
+  const contactCol = `
         <div>
           <h4>Contact</h4>
           <p>${s.address || "Dhaka, Bangladesh"}</p>
           ${s.phone ? `<a href="tel:${s.phone}">${s.phone}</a>` : ""}
           <a href="contact.html">Contact Form</a>
-        </div>
+        </div>`;
+  el.innerHTML = `
+    <div class="container">
+      <div class="footer-grid${minimal ? " footer-grid-minimal" : ""}">
+        ${brandCol}
+        ${minimal ? "" : shopCol}
+        ${minimal ? "" : catCol}
+        ${contactCol}
       </div>
       <div class="footer-bottom">© ${new Date().getFullYear()} Nureva Fashion. All rights reserved.</div>
     </div>
   `;
 }
 
-document.addEventListener("DOMContentLoaded", () => { initHeader(); });
+/* ---------- floating contact button (call / WhatsApp / details) ---------- */
+function initFab() {
+  if (document.getElementById("siteFab")) return;
+  const wrap = document.createElement("div");
+  wrap.id = "siteFab";
+  wrap.className = "fab-container";
+  wrap.innerHTML = `
+    <a class="fab-option" id="fabDetails" href="contact.html" aria-label="Details">ℹ️</a>
+    <a class="fab-option" id="fabWhatsapp" href="#" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
+    <a class="fab-option" id="fabCall" href="#" aria-label="Call">📞</a>
+    <button class="fab-main" id="fabToggle" aria-label="Contact us"><span>⋯</span></button>
+  `;
+  document.body.appendChild(wrap);
+  const toggle = document.getElementById("fabToggle");
+  toggle.addEventListener("click", () => {
+    wrap.classList.toggle("open");
+    toggle.querySelector("span").textContent = wrap.classList.contains("open") ? "✕" : "⋯";
+  });
+  document.addEventListener("click", (e) => {
+    if (!wrap.contains(e.target)) { wrap.classList.remove("open"); toggle.querySelector("span").textContent = "⋯"; }
+  });
+
+  function applyFabLinks() {
+    const s = NurevaStore.Settings.get();
+    const callBtn = document.getElementById("fabCall");
+    const waBtn = document.getElementById("fabWhatsapp");
+    if (s.phone) { callBtn.href = "tel:" + s.phone; callBtn.style.display = ""; }
+    else { callBtn.style.display = "none"; }
+    if (s.whatsapp) { waBtn.href = `https://wa.me/${s.whatsapp}`; waBtn.style.display = ""; }
+    else { waBtn.style.display = "none"; }
+  }
+  if (window.NurevaStore) { NurevaStore.ready.then(applyFabLinks); NurevaStore.onChange(applyFabLinks); }
+}
+
+document.addEventListener("DOMContentLoaded", () => { initHeader(); initFab(); });
