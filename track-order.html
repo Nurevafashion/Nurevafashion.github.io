@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Track Order — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=7">
 <style>
   .track-wrap { max-width: 480px; margin: 0 auto; padding: 36px 20px 60px; box-sizing: border-box; }
   .track-form { display: flex; gap: 10px; margin-bottom: 26px; }
@@ -22,11 +22,10 @@
   <div class="header-inner container">
     <a href="index.html" class="logo"><img src="logo.png" alt="Nureva Fashion" class="logo-img"><span class="logo-text">Nureva <span>Fashion</span></span></a>
     <nav class="main-nav">
-      <a href="index.html">Home</a>
-      <a href="products.html">All Products</a>
+          <a href="products.html">All Products</a>
       <a href="products.html?filter=new">New Arrivals</a>
       <a href="offers.html">Offers</a>
-      <a href="track-order.html">Track Order</a>
+      <a href="track-order.html">My Orders</a>
       <a href="contact.html">Contact</a>
     </nav>
     <div class="header-actions">
@@ -50,7 +49,6 @@
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <nav class="nav-drawer" id="navDrawer">
   <button class="drawer-close" id="drawerClose">✕</button>
-  <a href="index.html">Home</a>
   <a href="products.html">All Products</a>
   <a href="products.html?filter=new">New Arrivals</a>
   <a href="offers.html">Offers</a>
@@ -58,8 +56,7 @@
   <a href="products.html?cat=Three-Piece">Three-Piece</a>
   <a href="products.html?cat=Hijab">Hijab</a>
   <a href="products.html?cat=Panjabi">Panjabi</a>
-  <a href="track-order.html">Track Order</a>
-  <a href="track-order.html">Track Order</a>
+  <a href="track-order.html">My Orders</a>
       <a href="contact.html">Contact</a>
   <a data-fb-link href="#" target="_blank" rel="noopener">Facebook Page</a>
 </nav>
@@ -86,9 +83,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="firebase-config.js?v=5"></script>
-<script src="store.js?v=5"></script>
-<script src="site.js?v=5"></script>
+<script src="firebase-config.js?v=7"></script>
+<script src="store.js?v=7"></script>
+<script src="site.js?v=7"></script>
 <script>
   NurevaStore.ready.then(() => { applySettings(); renderFooter(); });
 

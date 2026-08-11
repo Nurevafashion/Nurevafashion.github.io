@@ -85,6 +85,8 @@
 .row-actions button { border: none; background: none; padding: 5px 8px; border-radius: 3px; font-size: 0.85rem; font-weight: 600; }
 .row-actions .edit-btn { color: var(--admin-pink-dark); background: var(--admin-pink-soft); }
 .row-actions .del-btn { color: #C0143C; background: rgba(192,20,60,0.08); }
+.del-btn { padding: 7px 14px; border-radius: var(--radius); border: 1.5px solid #C0143C; }
+.del-btn:hover { background: #C0143C; color: #fff; }
 .tag { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; }
 .tag.new { background: var(--admin-pink-soft); color: var(--admin-pink-dark); }
 .tag.offer { background: rgba(192,20,60,0.1); color: #C0143C; }
@@ -102,13 +104,27 @@
 .banner-slot label { font-size: 0.8rem; font-weight: 600; color: #8A5875; display: block; margin-bottom: 6px; }
 .banner-slot input[type=file] { font-size: 0.75rem; width: 100%; }
 
+/* ---------- order cards ---------- */
+.order-card { background: var(--white); border-radius: var(--radius); padding: 18px; box-shadow: 0 6px 20px rgba(198,0,126,0.08); margin-bottom: 16px; }
+.order-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.order-card-head select.order-status { padding: 6px 10px; border-radius: var(--radius); border: 1.5px solid rgba(198,0,126,0.3); font-weight: 600; font-size: 0.85rem; }
+.order-card-address { background: var(--admin-pink-soft); border-radius: var(--radius); padding: 10px 14px; font-size: 0.88rem; line-height: 1.6; margin-bottom: 14px; }
+.order-card-items { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.order-item-row { display: flex; align-items: center; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(198,0,126,0.08); }
+.order-item-row:last-child { border-bottom: none; padding-bottom: 0; }
+.order-item-row img { width: 48px; height: 60px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+.order-item-info { flex: 1; min-width: 0; }
+.order-card-totals { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.9rem; color: #6B4358; border-top: 1px dashed rgba(198,0,126,0.25); padding-top: 10px; }
+
 /* ---------- news list ---------- */
 .admin-inline-form { display: flex; gap: 10px; margin-bottom: 20px; }
 .admin-inline-form input { flex: 1; padding: 10px 13px; border: 1px solid rgba(198,0,126,0.25); border-radius: var(--radius); }
 .admin-inline-form .btn-primary { flex-shrink: 0; }
 .admin-list { display: flex; flex-direction: column; gap: 10px; }
-.admin-list-item { background: var(--white); border-radius: var(--radius); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 6px 20px rgba(198,0,126,0.08); }
-.admin-list-item button { border: none; background: none; color: #C0143C; font-weight: 600; }
+.admin-list-item { background: var(--white); border-radius: var(--radius); padding: 12px 16px; display: flex; gap: 12px; justify-content: space-between; align-items: flex-start; box-shadow: 0 6px 20px rgba(198,0,126,0.08); }
+.admin-list-item span { flex: 1; word-break: break-word; line-height: 1.5; }
+.admin-list-item button { flex-shrink: 0; border: 1.5px solid #C0143C; background: #FFF0F3; color: #C0143C; font-weight: 600; padding: 7px 12px; border-radius: var(--radius); font-size: 0.85rem; white-space: nowrap; }
+.admin-list-item button:hover { background: #C0143C; color: #fff; }
 
 /* ---------- modal ---------- */
 .modal-overlay {

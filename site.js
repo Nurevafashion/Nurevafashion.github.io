@@ -223,12 +223,16 @@ function initFab() {
   `;
   document.body.appendChild(wrap);
   const toggle = document.getElementById("fabToggle");
-  toggle.addEventListener("click", () => {
+  toggle.addEventListener("click", (e) => {
+    e.stopPropagation();
     wrap.classList.toggle("open");
     toggle.querySelector("span").textContent = wrap.classList.contains("open") ? "✕" : "⋯";
   });
   document.addEventListener("click", (e) => {
-    if (!wrap.contains(e.target)) { wrap.classList.remove("open"); toggle.querySelector("span").textContent = "⋯"; }
+    if (wrap.classList.contains("open") && !wrap.contains(e.target)) {
+      wrap.classList.remove("open");
+      toggle.querySelector("span").textContent = "⋯";
+    }
   });
 
   function applyFabLinks() {
@@ -263,6 +267,10 @@ function initBottomNav() {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-13z"/><path d="M6 6L4 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
       Cart
       <span class="bn-badge" id="bottomCartCount">0</span>
+    </a>
+    <a href="account.html" class="${path === "account.html" ? "active" : ""}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Account
     </a>
   `;
   document.body.appendChild(nav);

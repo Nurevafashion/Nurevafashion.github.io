@@ -148,10 +148,9 @@ const NurevaStore = (() => {
 
   /* ---------- Admin auth (Firebase Authentication) ---------- */
   const authListeners = [];
-  auth.onAuthStateChanged(user => authListeners.forEach(fn => fn(!!user)));
-  const Admin = {
+  auth.onAuthStateChanged(user => authListeners.forEach(fn => fn(!!user)));  const Admin = {
     isLoggedIn: () => !!auth.currentUser,
-    onAuthChange: (fn) => { authListeners.push(fn); fn(!!auth.currentUser); },
+    onAuthChange: (fn) => { authListeners.push(fn); },
     login: (password) => auth.signInWithEmailAndPassword(ADMIN_EMAIL, password),
     logout: () => auth.signOut(),
     changePassword: (newPassword) => {

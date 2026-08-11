@@ -5,14 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cart — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=7">
 <style>
-  .cart-row { display:flex; gap:16px; align-items:center; background:var(--white); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow); margin-bottom:14px; }
-  .cart-row img { width:64px; height:78px; object-fit:cover; border-radius:3px; }
-  .cart-row .info { flex:1; }
-  .cart-row .meta { font-size:0.82rem; color:var(--mauve); }
-  .cart-row .remove { background:rgba(162,59,59,0.1); border:1.5px solid rgba(162,59,59,0.3); color:var(--danger); font-size:1.3rem; width:42px; height:42px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
-  .cart-row .remove:hover { background:var(--danger); color:#fff; border-color:var(--danger); }
+  .cart-row { background:var(--white); border:1px solid rgba(0,0,0,0.08); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow); margin-bottom:14px; }
+  .cart-row-top { display:flex; gap:14px; align-items:flex-start; }
+  .cart-row img { width:76px; height:92px; object-fit:cover; border-radius:4px; cursor:zoom-in; flex-shrink:0; border:1px solid rgba(0,0,0,0.08); }
+  .cart-row .info { flex:1; min-width:0; }
+  .cart-row .meta { font-size:0.82rem; color:var(--mauve); margin-top:2px; }
+  .cart-row .remove {
+    margin-top:12px; width:100%; display:flex; align-items:center; justify-content:center; gap:8px;
+    background:#FFFFFF; border:1.5px solid var(--danger); color:var(--danger); font-size:0.88rem; font-weight:600;
+    padding:10px; border-radius:var(--radius);
+  }
+  .cart-row .remove:hover, .cart-row .remove:active { background:var(--danger); color:#fff; }
+  .cart-row .remove svg { width:16px; height:16px; }
   .cart-summary { background:var(--white); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); }
   .cart-summary .row { display:flex; justify-content:space-between; margin-bottom:10px; }
   .cart-summary .total { font-weight:700; font-size:1.15rem; color:var(--primary); border-top:1px dashed var(--gold); padding-top:12px; }
@@ -24,10 +30,9 @@
   <div class="header-inner container">
     <a href="index.html" class="logo"><img src="logo.png" alt="Nureva Fashion" class="logo-img"><span class="logo-text">Nureva <span>Fashion</span></span></a>
     <nav class="main-nav">
-      <a href="index.html">Home</a>
-      <a href="products.html">All Products</a>
+          <a href="products.html">All Products</a>
       <a href="offers.html">Offers</a>
-      <a href="track-order.html">Track Order</a>
+      <a href="track-order.html">My Orders</a>
       <a href="contact.html">Contact</a>
     </nav>
     <div class="header-actions">
@@ -43,10 +48,9 @@
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <nav class="nav-drawer" id="navDrawer">
   <button class="drawer-close" id="drawerClose">✕</button>
-  <a href="index.html">Home</a>
   <a href="products.html">All Products</a>
   <a href="offers.html">Offers</a>
-  <a href="track-order.html">Track Order</a>
+  <a href="track-order.html">My Orders</a>
       <a href="contact.html">Contact</a>
 </nav>
 
@@ -71,9 +75,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="firebase-config.js?v=5"></script>
-<script src="store.js?v=5"></script>
-<script src="site.js?v=5"></script>
+<script src="firebase-config.js?v=7"></script>
+<script src="store.js?v=7"></script>
+<script src="site.js?v=7"></script>
 <script>
   function renderCart() {
     const cart = getCart();
@@ -85,15 +89,21 @@
     }
     listEl.innerHTML = cart.map((c, i) => `
       <div class="cart-row">
-        <img src="${c.image}" alt="${c.name}">
-        <div class="info">
-          <div style="font-weight:600">${c.name}</div>
-          <div class="meta">Size: ${c.size} · Colour: ${c.color} · Qty: ${c.qty}</div>
-          <div style="color:var(--primary);font-weight:700;margin-top:4px">${formatTaka(c.price * c.qty)}</div>
+        <div class="cart-row-top">
+          <img src="${c.image}" alt="${c.name}" class="cart-img" data-i="${i}">
+          <div class="info">
+            <div style="font-weight:600">${c.name}</div>
+            <div class="meta">Size: ${c.size} · Colour: ${c.color} · Qty: ${c.qty}</div>
+            <div style="color:var(--primary);font-weight:700;margin-top:4px">${formatTaka(c.price * c.qty)}</div>
+          </div>
         </div>
-        <button class="remove" data-i="${i}" aria-label="Remove">🗑️</button>
+        <button class="remove" data-i="${i}" aria-label="Remove">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          Remove
+        </button>
       </div>
     `).join("");
+    document.querySelectorAll(".cart-img").forEach(img => img.addEventListener("click", () => openLightbox(img.src)));
     document.querySelectorAll(".remove").forEach(b => b.addEventListener("click", () => {
       const c = getCart(); c.splice(Number(b.dataset.i), 1); saveCart(c); renderCart();
     }));

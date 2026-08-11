@@ -269,33 +269,52 @@ document.getElementById("newsForm")?.addEventListener("submit", (e) => {
 /* ---------- Orders ---------- */
 function renderOrders() {
   const orders = NurevaStore.Orders.all();
-  const table = document.getElementById("orderTable");
+  const wrap = document.getElementById("orderTable");
   if (!orders.length) {
-    table.innerHTML = `<tr><td style="padding:24px;text-align:center;color:#8A5875">No orders yet</td></tr>`;
+    wrap.innerHTML = `<p style="color:#8A5875;padding:20px">No orders yet</p>`;
     return;
   }
   const statuses = ["New", "Processing", "Shipped", "Delivered", "Cancelled"];
-  table.innerHTML = `
-    <tr><th>Customer</th><th>Phone</th><th>Items</th><th>Total</th><th>Status</th><th>Actions</th></tr>
-    ${orders.map(o => `
-      <tr>
-        <td>${o.customer.name}<br><span style="color:#8A5875;font-size:0.8rem">${o.customer.district}</span></td>
-        <td>${o.customer.phone}</td>
-        <td>${o.items.map(i => i.name + " ×" + i.qty).join(", ")}</td>
-        <td>${taka(o.total)}</td>
-        <td>
-          <select data-id="${o.id}" class="order-status">
-            ${statuses.map(s => `<option ${o.status === s ? "selected" : ""}>${s}</option>`).join("")}
-          </select>
-        </td>
-        <td class="row-actions"><button class="del-btn" data-id="${o.id}">🗑️</button></td>
-      </tr>
-    `).join("")}
-  `;
-  table.querySelectorAll(".order-status").forEach(sel => sel.addEventListener("change", () => {
+  wrap.innerHTML = orders.map(o => `
+    <div class="order-card">
+      <div class="order-card-head">
+        <div>
+          <strong>${o.customer.name}</strong> · ${o.customer.phone}
+          <div style="color:#8A5875;font-size:0.82rem;margin-top:2px">${new Date(o.date).toLocaleString()}</div>
+        </div>
+        <select data-id="${o.id}" class="order-status">
+          ${statuses.map(s => `<option ${o.status === s ? "selected" : ""}>${s}</option>`).join("")}
+        </select>
+      </div>
+      <div class="order-card-address">
+        <strong>Delivery Address:</strong> ${o.customer.address || "—"}, ${o.customer.district || "—"}
+        ${o.customer.note ? `<br><strong>Note:</strong> ${o.customer.note}` : ""}
+        <br><strong>Payment:</strong> ${o.paymentMethod || "Cash on Delivery"}
+      </div>
+      <div class="order-card-items">
+        ${o.items.map(i => `
+          <div class="order-item-row">
+            <img src="${i.image}" alt="${i.name}">
+            <div class="order-item-info">
+              <div style="font-weight:600">${i.name}</div>
+              <div style="color:#8A5875;font-size:0.82rem">Size: ${i.size} · Colour: ${i.color} · Qty: ${i.qty}</div>
+            </div>
+            <div style="font-weight:700">${taka(i.price * i.qty)}</div>
+          </div>
+        `).join("")}
+      </div>
+      <div class="order-card-totals">
+        <span>Subtotal: ${taka(o.subtotal)}</span>
+        <span>Delivery: ${taka(o.deliveryFee)}</span>
+        <strong>Total: ${taka(o.total)}</strong>
+      </div>
+      <div style="margin-top:10px"><button class="del-btn" data-id="${o.id}">🗑️ Delete Order</button></div>
+    </div>
+  `).join("");
+  wrap.querySelectorAll(".order-status").forEach(sel => sel.addEventListener("change", () => {
     NurevaStore.Orders.updateStatus(sel.dataset.id, sel.value);
   }));
-  table.querySelectorAll(".del-btn").forEach(b => b.addEventListener("click", () => {
+  wrap.querySelectorAll(".del-btn").forEach(b => b.addEventListener("click", () => {
     if (confirm("Delete this order?")) NurevaStore.Orders.remove(b.dataset.id);
   }));
 }
