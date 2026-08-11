@@ -56,6 +56,7 @@ const NurevaStore = (() => {
       siteName: "Nureva Fashion",
       tagline: "Where Modesty Meets Elegance",
       facebook: "https://facebook.com/Nurevafashion",
+      instagram: "",
       whatsapp: "",
       phone: "",
       address: "Dhaka, Bangladesh",
@@ -189,7 +190,7 @@ const NurevaStore = (() => {
         id++;
       });
     });
-    const bannerLabels = ["Nureva Fashion", "New Collection 2026", "Premium Burqa", "Limited Time Offer", "Exclusive Panjabi"];
+    const bannerLabels = ["Nureva Fashion", "New Collection 2026", "Premium Burqa", "Limited Time Offer"];
     batch.set(db.collection("banners").doc("main"), { images: bannerLabels.map((l, i) => placeholderImage(l, "banner" + i)) });
     batch.set(db.collection("settings").doc("general"), defaultSettings(), { merge: true });
     return batch.commit();

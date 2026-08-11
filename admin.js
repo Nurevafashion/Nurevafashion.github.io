@@ -1,60 +1,59 @@
 /* ============================================================
-   Nureva Fashion — Admin Panel Logic (Firebase)
+   Nureva Fashion — Admin Panel Logic (multi-page)
+   This single file is shared by admin.html (login) and every
+   admin-*.html page. Each protected page gets a real URL, so
+   the browser's Back button works normally between them.
    ============================================================ */
 
 function taka(n) { return "৳" + Number(n || 0).toLocaleString("en-US"); }
 
+/* ---------- sidebar: highlight current page ---------- */
+document.querySelectorAll(".admin-nav a").forEach(a => {
+  const href = a.getAttribute("href");
+  if (href && location.pathname.endsWith(href)) a.classList.add("active");
+});
+document.getElementById("adminMobileToggle")?.addEventListener("click", () => {
+  document.querySelector(".admin-sidebar")?.classList.toggle("open");
+});
+document.getElementById("logoutBtn")?.addEventListener("click", () => {
+  NurevaStore.Admin.logout().then(() => { location.href = "admin.html"; });
+});
+
 /* ---------- auth ---------- */
-const loginScreen = document.getElementById("loginScreen");
-const adminApp = document.getElementById("adminApp");
-const loginError = document.getElementById("loginError");
+const isLoginPage = !!document.getElementById("loginForm");
 
-document.getElementById("loginForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const pw = document.getElementById("loginPassword").value;
-  loginError.style.display = "none";
-  NurevaStore.Admin.login(pw).catch(err => {
-    loginError.textContent = "Incorrect password, or the admin account isn't set up yet. See README.md.";
-    loginError.style.display = "block";
-    console.error(err);
+if (isLoginPage) {
+  const loginError = document.getElementById("loginError");
+  document.getElementById("loginForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const pw = document.getElementById("loginPassword").value;
+    loginError.style.display = "none";
+    NurevaStore.Admin.login(pw)
+      .then(() => { location.href = "admin-dashboard.html"; })
+      .catch(err => {
+        loginError.textContent = "Incorrect password, or the admin account isn't set up yet. See README.md.";
+        loginError.style.display = "block";
+        console.error(err);
+      });
   });
-});
-document.getElementById("logoutBtn").addEventListener("click", () => NurevaStore.Admin.logout());
-
-NurevaStore.Admin.onAuthChange(isLoggedIn => {
-  if (isLoggedIn) {
-    loginScreen.style.display = "none";
-    adminApp.style.display = "flex";
-    NurevaStore.ready.then(renderAll);
-    NurevaStore.onChange(renderAll);
-  } else {
-    loginScreen.style.display = "flex";
-    adminApp.style.display = "none";
-  }
-});
-
-/* ---------- tab navigation ---------- */
-document.querySelectorAll(".admin-nav button[data-tab]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".admin-nav button[data-tab]").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    document.querySelectorAll(".admin-panel").forEach(p => p.style.display = "none");
-    document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
-    document.querySelector(".admin-sidebar").classList.remove("open");
-    renderAll();
+  // already logged in? skip straight to the dashboard
+  NurevaStore.Admin.onAuthChange(isLoggedIn => { if (isLoggedIn) location.href = "admin-dashboard.html"; });
+} else {
+  // protected page: bounce to login if not authenticated, else render this page's content
+  NurevaStore.Admin.onAuthChange(isLoggedIn => {
+    if (!isLoggedIn) { location.href = "admin.html"; return; }
+    NurevaStore.ready.then(renderCurrentPage);
+    NurevaStore.onChange(renderCurrentPage);
   });
-});
-document.getElementById("adminMobileToggle").addEventListener("click", () => {
-  document.querySelector(".admin-sidebar").classList.toggle("open");
-});
+}
 
-function renderAll() {
-  renderDashboard();
-  renderProducts();
-  renderBanners();
-  renderNews();
-  renderOrders();
-  renderSettings();
+function renderCurrentPage() {
+  if (document.getElementById("statGrid")) renderDashboard();
+  if (document.getElementById("productTable")) { renderProductFilterBar(); renderProducts(); }
+  if (document.getElementById("bannerGrid")) renderBanners();
+  if (document.getElementById("newsList")) renderNews();
+  if (document.getElementById("orderTable")) renderOrders();
+  if (document.getElementById("setSiteName")) renderSettings();
 }
 
 /* ---------- Dashboard ---------- */
@@ -76,17 +75,17 @@ function renderDashboard() {
     <div class="admin-list-item">
       <div>
         <strong>${o.customer.name}</strong> — ${o.customer.phone}<br>
-        <span style="color:var(--mauve);font-size:0.85rem">${o.items.length} item(s) · ${taka(o.total)}</span>
+        <span style="color:#8A5875;font-size:0.85rem">${o.items.length} item(s) · ${taka(o.total)}</span>
       </div>
       <span class="tag status">${o.status}</span>
     </div>
-  `).join("") : `<p style="color:var(--mauve)">No orders yet.</p>`;
+  `).join("") : `<p style="color:#8A5875">No orders yet.</p>`;
 
   if (!products.length) {
     document.getElementById("recentOrders").insertAdjacentHTML("beforeend",
-      `<div style="margin-top:16px"><button class="btn btn-outline" style="border-color:var(--primary);color:var(--primary)" id="seedDemoBtn">Add sample demo products</button></div>`);
+      `<div style="margin-top:16px"><button class="btn btn-outline" id="seedDemoBtn">Add sample demo products</button></div>`);
     document.getElementById("seedDemoBtn")?.addEventListener("click", () => {
-      if (confirm("This adds 16 sample products, 5 cover banners and default settings. Continue?")) {
+      if (confirm("This adds sample products, 4 cover banners and default settings. Continue?")) {
         NurevaStore.seedDemoData().then(() => toastAdmin("Demo data added")).catch(err => alert(err.message));
       }
     });
@@ -96,21 +95,22 @@ function renderDashboard() {
 /* ---------- Products ---------- */
 let productFilter = "";
 function renderProductFilterBar() {
+  const bar = document.getElementById("productFilterBar");
+  if (!bar) return;
   const cats = ["", ...NurevaStore.CATEGORIES];
-  document.getElementById("productFilterBar").innerHTML = cats.map(c => `
+  bar.innerHTML = cats.map(c => `
     <button class="filter-chip ${productFilter === c ? "active" : ""}" data-cat="${c}">${c || "All"}</button>
   `).join("");
-  document.querySelectorAll("#productFilterBar .filter-chip").forEach(b => b.addEventListener("click", () => {
+  bar.querySelectorAll(".filter-chip").forEach(b => b.addEventListener("click", () => {
     productFilter = b.dataset.cat; renderProducts();
   }));
 }
 
 function renderProducts() {
-  renderProductFilterBar();
   const list = productFilter ? NurevaStore.Products.byCategory(productFilter) : NurevaStore.Products.all();
   const table = document.getElementById("productTable");
   if (!list.length) {
-    table.innerHTML = `<tr><td style="padding:24px;text-align:center;color:var(--mauve)">No products found</td></tr>`;
+    table.innerHTML = `<tr><td style="padding:24px;text-align:center;color:#8A5875">No products found</td></tr>`;
     return;
   }
   table.innerHTML = `
@@ -120,7 +120,7 @@ function renderProducts() {
         <td><img class="thumb" src="${p.images[0]}" alt="${p.name}"></td>
         <td>${p.name}</td>
         <td>${p.category}</td>
-        <td>${p.offerPrice ? `${taka(p.offerPrice)} <s style="color:var(--mauve)">${taka(p.price)}</s>` : taka(p.price)}</td>
+        <td>${p.offerPrice ? `${taka(p.offerPrice)} <s style="color:#8A5875">${taka(p.price)}</s>` : taka(p.price)}</td>
         <td>${p.stock}</td>
         <td>${p.isNew ? '<span class="tag new">New</span>' : ""} ${p.offerPrice ? '<span class="tag offer">Offer</span>' : ""}</td>
         <td class="row-actions">
@@ -140,13 +140,50 @@ function renderProducts() {
 
 /* ---------- product modal ---------- */
 const productModal = document.getElementById("productModal");
-const productForm = document.getElementById("productForm");
 let currentImages = [];
 
-document.getElementById("newProductBtn").addEventListener("click", () => openProductModal(null));
-document.getElementById("modalClose").addEventListener("click", closeProductModal);
-document.getElementById("modalCancel").addEventListener("click", closeProductModal);
-productModal.addEventListener("click", (e) => { if (e.target === productModal) closeProductModal(); });
+if (productModal) {
+  const productForm = document.getElementById("productForm");
+  document.getElementById("newProductBtn")?.addEventListener("click", () => openProductModal(null));
+  document.getElementById("modalClose").addEventListener("click", closeProductModal);
+  document.getElementById("modalCancel").addEventListener("click", closeProductModal);
+  productModal.addEventListener("click", (e) => { if (e.target === productModal) closeProductModal(); });
+
+  document.getElementById("pImages").addEventListener("change", async (e) => {
+    const files = Array.from(e.target.files);
+    for (const file of files) {
+      try {
+        const compressed = await NurevaStore.compressImage(file, 800, 0.72);
+        currentImages.push(compressed);
+        renderImagePreview();
+      } catch (err) { console.error(err); }
+    }
+    e.target.value = "";
+  });
+
+  productForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const id = document.getElementById("pId").value;
+    const name = document.getElementById("pName").value.trim();
+    if (!currentImages.length) currentImages = [NurevaStore.placeholderImage(name)];
+    const data = {
+      name,
+      category: document.getElementById("pCategory").value,
+      price: Number(document.getElementById("pPrice").value),
+      offerPrice: document.getElementById("pOfferPrice").value ? Number(document.getElementById("pOfferPrice").value) : null,
+      stock: Number(document.getElementById("pStock").value) || 0,
+      sizes: document.getElementById("pSizes").value.split(",").map(s => s.trim()).filter(Boolean),
+      colors: document.getElementById("pColors").value.split(",").map(s => s.trim()).filter(Boolean),
+      description: document.getElementById("pDescription").value.trim(),
+      images: currentImages,
+      isNew: document.getElementById("pIsNew").checked,
+      isFeatured: document.getElementById("pIsFeatured").checked,
+    };
+    const action = id ? NurevaStore.Products.update(id, data) : NurevaStore.Products.add(data);
+    action.then(() => { closeProductModal(); toastAdmin("Product saved"); })
+          .catch(err => alert(err.message));
+  });
+}
 
 function openProductModal(id) {
   const catSelect = document.getElementById("pCategory");
@@ -168,8 +205,11 @@ function openProductModal(id) {
   renderImagePreview();
   productModal.classList.add("open");
 }
-function closeProductModal() { productModal.classList.remove("open"); productForm.reset(); currentImages = []; }
-
+function closeProductModal() {
+  productModal.classList.remove("open");
+  document.getElementById("productForm").reset();
+  currentImages = [];
+}
 function renderImagePreview() {
   const wrap = document.getElementById("pImagePreview");
   wrap.innerHTML = currentImages.map((img, i) => `
@@ -180,46 +220,11 @@ function renderImagePreview() {
   }));
 }
 
-document.getElementById("pImages").addEventListener("change", async (e) => {
-  const files = Array.from(e.target.files);
-  for (const file of files) {
-    try {
-      const compressed = await NurevaStore.compressImage(file, 800, 0.72);
-      currentImages.push(compressed);
-      renderImagePreview();
-    } catch (err) { console.error(err); }
-  }
-  e.target.value = "";
-});
-
-productForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const id = document.getElementById("pId").value;
-  const name = document.getElementById("pName").value.trim();
-  if (!currentImages.length) currentImages = [NurevaStore.placeholderImage(name)];
-  const data = {
-    name,
-    category: document.getElementById("pCategory").value,
-    price: Number(document.getElementById("pPrice").value),
-    offerPrice: document.getElementById("pOfferPrice").value ? Number(document.getElementById("pOfferPrice").value) : null,
-    stock: Number(document.getElementById("pStock").value) || 0,
-    sizes: document.getElementById("pSizes").value.split(",").map(s => s.trim()).filter(Boolean),
-    colors: document.getElementById("pColors").value.split(",").map(s => s.trim()).filter(Boolean),
-    description: document.getElementById("pDescription").value.trim(),
-    images: currentImages,
-    isNew: document.getElementById("pIsNew").checked,
-    isFeatured: document.getElementById("pIsFeatured").checked,
-  };
-  const action = id ? NurevaStore.Products.update(id, data) : NurevaStore.Products.add(data);
-  action.then(() => { closeProductModal(); toastAdmin("Product saved"); })
-        .catch(err => alert(err.message));
-});
-
 /* ---------- Banners ---------- */
 function renderBanners() {
   const banners = NurevaStore.Banners.all();
   const grid = document.getElementById("bannerGrid");
-  grid.innerHTML = [0, 1, 2, 3, 4].map(i => `
+  grid.innerHTML = [0, 1, 2, 3].map(i => `
     <div class="banner-slot">
       <label>Slide ${i + 1}</label>
       <div class="preview"><img src="${banners[i] || NurevaStore.placeholderImage("Slide " + (i + 1))}"></div>
@@ -248,12 +253,12 @@ function renderNews() {
       <span>${n.text}</span>
       <button data-id="${n.id}">🗑️ Remove</button>
     </div>
-  `).join("") : `<p style="color:var(--mauve)">No notices yet</p>`;
+  `).join("") : `<p style="color:#8A5875">No notices yet</p>`;
   document.querySelectorAll("#newsList button").forEach(b => b.addEventListener("click", () => {
     NurevaStore.News.remove(b.dataset.id);
   }));
 }
-document.getElementById("newsForm").addEventListener("submit", (e) => {
+document.getElementById("newsForm")?.addEventListener("submit", (e) => {
   e.preventDefault();
   const input = document.getElementById("newsInput");
   if (input.value.trim()) {
@@ -266,7 +271,7 @@ function renderOrders() {
   const orders = NurevaStore.Orders.all();
   const table = document.getElementById("orderTable");
   if (!orders.length) {
-    table.innerHTML = `<tr><td style="padding:24px;text-align:center;color:var(--mauve)">No orders yet</td></tr>`;
+    table.innerHTML = `<tr><td style="padding:24px;text-align:center;color:#8A5875">No orders yet</td></tr>`;
     return;
   }
   const statuses = ["New", "Processing", "Shipped", "Delivered", "Cancelled"];
@@ -274,7 +279,7 @@ function renderOrders() {
     <tr><th>Customer</th><th>Phone</th><th>Items</th><th>Total</th><th>Status</th><th>Actions</th></tr>
     ${orders.map(o => `
       <tr>
-        <td>${o.customer.name}<br><span style="color:var(--mauve);font-size:0.8rem">${o.customer.district}</span></td>
+        <td>${o.customer.name}<br><span style="color:#8A5875;font-size:0.8rem">${o.customer.district}</span></td>
         <td>${o.customer.phone}</td>
         <td>${o.items.map(i => i.name + " ×" + i.qty).join(", ")}</td>
         <td>${taka(o.total)}</td>
@@ -301,18 +306,20 @@ function renderSettings() {
   document.getElementById("setSiteName").value = s.siteName || "";
   document.getElementById("setTagline").value = s.tagline || "";
   document.getElementById("setFacebook").value = s.facebook || "";
+  document.getElementById("setInstagram").value = s.instagram || "";
   document.getElementById("setPhone").value = s.phone || "";
   document.getElementById("setWhatsapp").value = s.whatsapp || "";
   document.getElementById("setAddress").value = s.address || "";
   document.getElementById("setDeliveryIn").value = s.deliveryInsideDhaka || 70;
   document.getElementById("setDeliveryOut").value = s.deliveryOutsideDhaka || 130;
 }
-document.getElementById("settingsForm").addEventListener("submit", (e) => {
+document.getElementById("settingsForm")?.addEventListener("submit", (e) => {
   e.preventDefault();
   NurevaStore.Settings.update({
     siteName: document.getElementById("setSiteName").value,
     tagline: document.getElementById("setTagline").value,
     facebook: document.getElementById("setFacebook").value,
+    instagram: document.getElementById("setInstagram").value,
     phone: document.getElementById("setPhone").value,
     whatsapp: document.getElementById("setWhatsapp").value,
     address: document.getElementById("setAddress").value,
@@ -320,7 +327,7 @@ document.getElementById("settingsForm").addEventListener("submit", (e) => {
     deliveryOutsideDhaka: Number(document.getElementById("setDeliveryOut").value) || 0,
   }).then(() => toastAdmin("Settings saved"));
 });
-document.getElementById("passwordForm").addEventListener("submit", (e) => {
+document.getElementById("passwordForm")?.addEventListener("submit", (e) => {
   e.preventDefault();
   const pw = document.getElementById("newPassword").value;
   NurevaStore.Admin.changePassword(pw)

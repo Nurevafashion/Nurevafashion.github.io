@@ -169,7 +169,10 @@ function renderFooter(minimal) {
           <div class="foot-logo">Nureva <span>Fashion</span></div>
           <p>${s.tagline || "Where Modesty Meets Elegance"}</p>
           <p>Your trusted destination for premium Burqa, Three-Piece, Hijab and Panjabi.</p>
-          <div class="social-row"><a href="${s.facebook || '#'}" target="_blank" rel="noopener" aria-label="Facebook">f</a></div>
+          <div class="social-row">
+            <a href="${s.facebook || '#'}" target="_blank" rel="noopener" aria-label="Facebook">f</a>
+            ${s.instagram ? `<a class="ig" href="${s.instagram}" target="_blank" rel="noopener" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>` : ""}
+          </div>
         </div>`;
   const shopCol = `
         <div>

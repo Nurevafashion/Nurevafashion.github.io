@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Products — Nureva Fashion Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="admin.css?v=5">
+</head>
+<body class="admin-body">
+
+<div class="admin-app">
+  <aside class="admin-sidebar">
+    <div class="admin-logo">Nureva <span>Fashion</span><small>Admin Panel</small></div>
+    <nav class="admin-nav">
+      <a href="admin-dashboard.html">📊 Dashboard</a>
+      <a href="admin-products.html">👗 Products</a>
+      <a href="admin-banners.html">🖼️ Cover / Slider</a>
+      <a href="admin-news.html">📢 News / Notice</a>
+      <a href="admin-orders.html">📦 Orders</a>
+      <a href="admin-settings.html">⚙️ Settings</a>
+    </nav>
+    <a href="index.html" target="_blank" class="admin-view-site">🔗 View Site</a>
+    <button id="logoutBtn" class="admin-logout">🚪 Logout</button>
+  </aside>
+
+  <main class="admin-main">
+    <button class="admin-mobile-toggle" id="adminMobileToggle">☰ Menu</button>
+    <section class="admin-panel">
+      <div class="admin-panel-head">
+        <h2>Product Management</h2>
+        <button class="btn btn-primary" id="newProductBtn">+ New Product</button>
+      </div>
+      <div class="filter-bar" id="productFilterBar"></div>
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="productTable"></table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Product edit modal -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalTitle">New Product</h3>
+      <button id="modalClose">✕</button>
+    </div>
+    <form id="productForm">
+      <input type="hidden" id="pId">
+      <div class="form-row">
+        <div class="form-group"><label>Product Name *</label><input type="text" id="pName" required></div>
+        <div class="form-group"><label>Category *</label>
+          <select id="pCategory" required></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Price (৳) *</label><input type="number" id="pPrice" required></div>
+        <div class="form-group"><label>Offer Price (৳) — optional</label><input type="number" id="pOfferPrice"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Stock Quantity</label><input type="number" id="pStock" value="10"></div>
+        <div class="form-group"><label>Sizes (comma separated)</label><input type="text" id="pSizes" value="S, M, L, XL"></div>
+      </div>
+      <div class="form-group"><label>Colours (comma separated)</label><input type="text" id="pColors" value="Black, Navy Blue"></div>
+      <div class="form-group"><label>Description</label><textarea id="pDescription"></textarea></div>
+      <div class="form-group">
+        <label>Images (multiple allowed)</label>
+        <input type="file" id="pImages" accept="image/*" multiple>
+        <div class="admin-thumb-row" id="pImagePreview"></div>
+      </div>
+      <div class="form-row">
+        <label class="chip" style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="pIsNew"> Show as New Arrival</label>
+        <label class="chip" style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="pIsFeatured"> Show in Popular Picks</label>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:10px">
+        <button type="submit" class="btn btn-primary" style="flex:1">Save</button>
+        <button type="button" class="btn btn-outline" id="modalCancel">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="firebase-config.js?v=5"></script>
+<script src="store.js?v=5"></script>
+<script src="admin.js?v=5"></script>
+</body>
+</html>

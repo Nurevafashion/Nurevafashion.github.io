@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contact — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 <style>
   .contact-wrap { display:grid; grid-template-columns:1fr 1fr; gap:40px; padding:40px 0 60px; }
   .contact-card { background:var(--white); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow); margin-bottom:16px; }
@@ -15,7 +15,6 @@
 </head>
 <body>
 
-<div class="topbar">Cash on Delivery Nationwide</div>
 <header class="site-header">
   <div class="header-inner container">
     <a href="index.html" class="logo"><img src="logo.png" alt="Nureva Fashion" class="logo-img"><span class="logo-text">Nureva <span>Fashion</span></span></a>
@@ -61,13 +60,15 @@
   </div>
 </div>
 
+<div class="topbar">Cash on Delivery Nationwide &nbsp;•&nbsp; Order via Facebook or our website</div>
+
 <footer id="siteFooter"></footer>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="firebase-config.js?v=4"></script>
-<script src="store.js?v=4"></script>
-<script src="site.js?v=4"></script>
+<script src="firebase-config.js?v=5"></script>
+<script src="store.js?v=5"></script>
+<script src="site.js?v=5"></script>
 <script>
   NurevaStore.ready.then(() => { applySettings(); renderFooter(); });
   document.getElementById("contactForm").addEventListener("submit", (e) => {
