@@ -147,15 +147,40 @@ const NurevaStore = (() => {
   };
 
   /* ---------- Admin auth (Firebase Authentication) ---------- */
-  const authListeners = [];
-  auth.onAuthStateChanged(user => authListeners.forEach(fn => fn(!!user)));  const Admin = {
-    isLoggedIn: () => !!auth.currentUser,
-    onAuthChange: (fn) => { authListeners.push(fn); },
+  const adminAuthListeners = [];
+  const customerAuthListeners = [];
+  auth.onAuthStateChanged(user => {
+    const isAdminUser = !!user && user.email === ADMIN_EMAIL;
+    adminAuthListeners.forEach(fn => fn(isAdminUser));
+    customerAuthListeners.forEach(fn => fn(!isAdminUser && user ? user : null));
+  });
+
+  const Admin = {
+    isLoggedIn: () => !!auth.currentUser && auth.currentUser.email === ADMIN_EMAIL,
+    onAuthChange: (fn) => { adminAuthListeners.push(fn); },
     login: (password) => auth.signInWithEmailAndPassword(ADMIN_EMAIL, password),
     logout: () => auth.signOut(),
     changePassword: (newPassword) => {
       if (!auth.currentUser) return Promise.reject(new Error("Not logged in"));
       return auth.currentUser.updatePassword(newPassword);
+    },
+  };
+
+  /* ---------- Customer accounts (sign up / log in), separate from Admin ---------- */
+  const Customer = {
+    onAuthChange: (fn) => { customerAuthListeners.push(fn); },
+    signUp: (name, phone, email, password) => {
+      if (email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase()) return Promise.reject(new Error("This email can't be used."));
+      return auth.createUserWithEmailAndPassword(email, password).then(cred =>
+        db.collection("customers").doc(cred.user.uid).set({ name, phone, email, createdAt: Date.now() })
+      );
+    },
+    login: (email, password) => auth.signInWithEmailAndPassword(email, password),
+    logout: () => auth.signOut(),
+    getProfile: () => {
+      const user = auth.currentUser;
+      if (!user || user.email === ADMIN_EMAIL) return Promise.resolve(null);
+      return db.collection("customers").doc(user.uid).get().then(doc => doc.exists ? { uid: user.uid, ...doc.data() } : null);
     },
   };
 
@@ -195,5 +220,5 @@ const NurevaStore = (() => {
     return batch.commit();
   }
 
-  return { CATEGORIES, ready, onChange, Products, Banners, News, Settings, Orders, Admin, placeholderImage, compressImage, seedDemoData };
+  return { CATEGORIES, ready, onChange, Products, Banners, News, Settings, Orders, Admin, Customer, placeholderImage, compressImage, seedDemoData };
 })();

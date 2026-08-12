@@ -5,14 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Account — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css?v=8">
 <style>
-  .account-wrap { max-width: 480px; margin: 0 auto; padding: 30px 20px 60px; }
+  .account-wrap { max-width: 460px; margin: 0 auto; padding: 30px 20px 60px; }
+  .auth-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .auth-tab { flex: 1; padding: 11px; text-align: center; border-radius: var(--radius); border: 1.5px solid rgba(0,0,0,0.15); font-weight: 600; font-size: 0.9rem; background: var(--white); }
+  .auth-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .auth-panel { display: none; }
+  .auth-panel.active { display: block; }
+  .auth-error { color: var(--danger); font-size: 0.85rem; margin-top: 8px; display: none; }
+  .profile-card { background: var(--white); border: 1px solid rgba(0,0,0,0.1); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); margin-bottom: 18px; }
+  .profile-card h3 { font-family: var(--font-display); margin-bottom: 4px; }
+  .profile-card p { color: var(--mauve); font-size: 0.9rem; margin-bottom: 2px; }
   .account-link { display: flex; align-items: center; gap: 14px; background: var(--white); border: 1px solid rgba(0,0,0,0.1); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 12px; box-shadow: var(--shadow); }
   .account-link svg { width: 22px; height: 22px; color: var(--gold); flex-shrink: 0; }
   .account-link .txt { flex: 1; }
   .account-link .txt strong { display: block; font-size: 0.95rem; }
   .account-link .txt span { color: var(--mauve); font-size: 0.8rem; }
+  .order-mini { background: var(--white); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); margin-bottom: 10px; font-size: 0.88rem; }
 </style>
 </head>
 <body>
@@ -21,7 +31,8 @@
   <div class="header-inner container">
     <a href="index.html" class="logo"><img src="logo.png" alt="Nureva Fashion" class="logo-img"><span class="logo-text">Nureva <span>Fashion</span></span></a>
     <nav class="main-nav">
-          <a href="products.html">All Products</a>
+      <a href="index.html">Home</a>
+      <a href="products.html">All Products</a>
       <a href="offers.html">Offers</a>
       <a href="contact.html">Contact</a>
     </nav>
@@ -61,27 +72,63 @@
 <div class="page-hero">
   <div class="container">
     <h1>My Account</h1>
-    <p>Manage your orders and get in touch</p>
+    <p id="pageSubtitle">Sign in or create an account</p>
   </div>
 </div>
 
 <div class="account-wrap">
-  <a href="track-order.html" class="account-link">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-    <div class="txt"><strong>Track My Orders</strong><span>Check the status of your orders</span></div>
-  </a>
-  <a href="cart.html" class="account-link">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-13z"/><path d="M6 6L4 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
-    <div class="txt"><strong>My Cart</strong><span>Review items before checkout</span></div>
-  </a>
-  <a href="contact.html" class="account-link">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    <div class="txt"><strong>Contact Us</strong><span>Questions or help with an order</span></div>
-  </a>
-  <a data-fb-link href="#" target="_blank" rel="noopener" class="account-link">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-    <div class="txt"><strong>Facebook Page</strong><span>Follow us for updates and offers</span></div>
-  </a>
+
+  <!-- Signed-out view -->
+  <div id="loggedOutView">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin">Log In</button>
+      <button class="auth-tab" id="tabSignup">Sign Up</button>
+    </div>
+
+    <div class="auth-panel active" id="panelLogin">
+      <form id="loginForm">
+        <div class="form-group"><label>Email</label><input type="email" id="liEmail" required></div>
+        <div class="form-group"><label>Password</label><input type="password" id="liPassword" required></div>
+        <button class="btn btn-primary btn-block" type="submit">Log In</button>
+        <p class="auth-error" id="loginError"></p>
+      </form>
+    </div>
+
+    <div class="auth-panel" id="panelSignup">
+      <form id="signupForm">
+        <div class="form-group"><label>Full Name</label><input type="text" id="suName" required></div>
+        <div class="form-group"><label>Mobile Number</label><input type="tel" id="suPhone" required placeholder="01XXXXXXXXX"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="suEmail" required></div>
+        <div class="form-group"><label>Password</label><input type="password" id="suPassword" required minlength="6" placeholder="At least 6 characters"></div>
+        <button class="btn btn-primary btn-block" type="submit">Create Account</button>
+        <p class="auth-error" id="signupError"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Signed-in view -->
+  <div id="loggedInView" style="display:none">
+    <div class="profile-card">
+      <h3 id="profName">—</h3>
+      <p id="profPhone"></p>
+      <p id="profEmail"></p>
+      <button class="btn btn-outline" id="logoutBtn" style="margin-top:14px">Log Out</button>
+    </div>
+
+    <a href="track-order.html" class="account-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      <div class="txt"><strong>Track My Orders</strong><span>Check the status of your orders</span></div>
+    </a>
+    <a href="cart.html" class="account-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-13z"/><path d="M6 6L4 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+      <div class="txt"><strong>My Cart</strong><span>Review items before checkout</span></div>
+    </a>
+    <a href="contact.html" class="account-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <div class="txt"><strong>Contact Us</strong><span>Questions or help with an order</span></div>
+    </a>
+  </div>
+
 </div>
 
 <div class="topbar">Cash on Delivery Nationwide &nbsp;•&nbsp; Order via Facebook or our website</div>
@@ -91,11 +138,64 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="firebase-config.js?v=7"></script>
-<script src="store.js?v=7"></script>
-<script src="site.js?v=7"></script>
+<script src="firebase-config.js?v=8"></script>
+<script src="store.js?v=8"></script>
+<script src="site.js?v=8"></script>
 <script>
   NurevaStore.ready.then(() => { applySettings(); renderFooter(); });
+
+  // tab switching
+  document.getElementById("tabLogin").addEventListener("click", () => switchTab("login"));
+  document.getElementById("tabSignup").addEventListener("click", () => switchTab("signup"));
+  function switchTab(which) {
+    document.getElementById("tabLogin").classList.toggle("active", which === "login");
+    document.getElementById("tabSignup").classList.toggle("active", which === "signup");
+    document.getElementById("panelLogin").classList.toggle("active", which === "login");
+    document.getElementById("panelSignup").classList.toggle("active", which === "signup");
+  }
+
+  document.getElementById("loginForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const err = document.getElementById("loginError");
+    err.style.display = "none";
+    NurevaStore.Customer.login(document.getElementById("liEmail").value, document.getElementById("liPassword").value)
+      .catch(ex => { err.textContent = "Incorrect email or password."; err.style.display = "block"; });
+  });
+
+  document.getElementById("signupForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const err = document.getElementById("signupError");
+    err.style.display = "none";
+    const name = document.getElementById("suName").value.trim();
+    const phone = document.getElementById("suPhone").value.trim();
+    const email = document.getElementById("suEmail").value.trim();
+    const pw = document.getElementById("suPassword").value;
+    NurevaStore.Customer.signUp(name, phone, email, pw)
+      .catch(ex => { err.textContent = ex.message || "Could not create account."; err.style.display = "block"; });
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", () => NurevaStore.Customer.logout());
+
+  NurevaStore.Customer.onAuthChange(user => {
+    const loggedOut = document.getElementById("loggedOutView");
+    const loggedIn = document.getElementById("loggedInView");
+    const subtitle = document.getElementById("pageSubtitle");
+    if (user) {
+      loggedOut.style.display = "none";
+      loggedIn.style.display = "block";
+      subtitle.textContent = "Welcome back!";
+      NurevaStore.Customer.getProfile().then(profile => {
+        if (!profile) return;
+        document.getElementById("profName").textContent = profile.name || "—";
+        document.getElementById("profPhone").textContent = profile.phone || "";
+        document.getElementById("profEmail").textContent = profile.email || "";
+      });
+    } else {
+      loggedOut.style.display = "block";
+      loggedIn.style.display = "none";
+      subtitle.textContent = "Sign in or create an account";
+    }
+  });
 </script>
 </body>
 </html>

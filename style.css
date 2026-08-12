@@ -99,7 +99,7 @@ nav.main-nav a.active { color: var(--primary); }
 .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease; background-size: cover; background-position: center; pointer-events: none; }
 .hero-slide.active { opacity: 1; pointer-events: auto; }
 .hero-slide::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.5) 100%); }
-.hero-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--ivory); padding: 0 20px; pointer-events: none; }
+.hero-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; text-align: center; color: var(--ivory); padding: 0 20px 60px; pointer-events: none; }
 .hero-content a, .hero-content button { pointer-events: auto; }
 .hero-content .eyebrow { color: var(--gold-soft); letter-spacing: 0.18em; font-size: 0.78rem; text-transform: uppercase; margin-bottom: 14px; }
 .hero-content h1 { font-family: var(--font-display); font-size: clamp(2rem, 6vw, 3.4rem); font-weight: 700; margin-bottom: 14px; text-shadow: 0 2px 18px rgba(0,0,0,0.25); }

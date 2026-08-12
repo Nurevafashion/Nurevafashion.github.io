@@ -219,19 +219,21 @@ function initFab() {
     <a class="fab-option" id="fabDetails" href="contact.html" aria-label="Details">ℹ️</a>
     <a class="fab-option" id="fabWhatsapp" href="#" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
     <a class="fab-option" id="fabCall" href="#" aria-label="Call">📞</a>
-    <button class="fab-main" id="fabToggle" aria-label="Contact us"><span>⋯</span></button>
+    <button class="fab-main" id="fabToggle" type="button" aria-label="Contact us" onclick="window.__toggleFab(event)"><span>⋯</span></button>
   `;
   document.body.appendChild(wrap);
-  const toggle = document.getElementById("fabToggle");
-  toggle.addEventListener("click", (e) => {
-    e.stopPropagation();
+
+  window.__toggleFab = function (e) {
+    if (e) e.stopPropagation();
     wrap.classList.toggle("open");
-    toggle.querySelector("span").textContent = wrap.classList.contains("open") ? "✕" : "⋯";
-  });
+    const s = wrap.querySelector("#fabToggle span");
+    if (s) s.textContent = wrap.classList.contains("open") ? "✕" : "⋯";
+  };
   document.addEventListener("click", (e) => {
     if (wrap.classList.contains("open") && !wrap.contains(e.target)) {
       wrap.classList.remove("open");
-      toggle.querySelector("span").textContent = "⋯";
+      const s = wrap.querySelector("#fabToggle span");
+      if (s) s.textContent = "⋯";
     }
   });
 

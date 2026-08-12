@@ -13,8 +13,15 @@ document.querySelectorAll(".admin-nav a").forEach(a => {
   if (href && location.pathname.endsWith(href)) a.classList.add("active");
 });
 document.getElementById("adminMobileToggle")?.addEventListener("click", () => {
-  document.querySelector(".admin-sidebar")?.classList.toggle("open");
+  document.querySelector(".admin-sidebar")?.classList.add("open");
+  document.getElementById("adminSidebarOverlay")?.classList.add("open");
 });
+function closeAdminSidebar() {
+  document.querySelector(".admin-sidebar")?.classList.remove("open");
+  document.getElementById("adminSidebarOverlay")?.classList.remove("open");
+}
+document.getElementById("adminSidebarClose")?.addEventListener("click", closeAdminSidebar);
+document.getElementById("adminSidebarOverlay")?.addEventListener("click", closeAdminSidebar);
 document.getElementById("logoutBtn")?.addEventListener("click", () => {
   NurevaStore.Admin.logout().then(() => { location.href = "admin.html"; });
 });
