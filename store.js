@@ -178,6 +178,7 @@ const NurevaStore = (() => {
     },
     login: (email, password) => auth.signInWithEmailAndPassword(email, password),
     logout: () => auth.signOut(),
+    resetPassword: (email) => auth.sendPasswordResetEmail(email),
     getProfile: () => {
       const user = auth.currentUser;
       if (!user || user.email === ADMIN_EMAIL) return Promise.resolve(null);

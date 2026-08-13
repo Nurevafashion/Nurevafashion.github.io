@@ -93,6 +93,7 @@
         <div class="form-group"><label>Password</label><input type="password" id="liPassword" required></div>
         <button class="btn btn-primary btn-block" type="submit">Log In</button>
         <p class="auth-error" id="loginError"></p>
+        <p style="text-align:right; margin-top:10px;"><a href="#" id="forgotPasswordLink" style="font-size:0.85rem; color:var(--primary);">Forgot password?</a></p>
       </form>
     </div>
 
@@ -104,6 +105,17 @@
         <div class="form-group"><label>Password</label><input type="password" id="suPassword" required minlength="6" placeholder="At least 6 characters"></div>
         <button class="btn btn-primary btn-block" type="submit">Create Account</button>
         <p class="auth-error" id="signupError"></p>
+      </form>
+    </div>
+
+    <div class="auth-panel" id="panelForgot">
+      <p style="font-size:0.88rem; color:var(--mauve); margin-bottom:14px;">Enter your account email and we'll send you a link to reset your password.</p>
+      <form id="forgotForm">
+        <div class="form-group"><label>Email</label><input type="email" id="fpEmail" required></div>
+        <button class="btn btn-primary btn-block" type="submit">Send Reset Link</button>
+        <p class="auth-error" id="forgotError"></p>
+        <p class="auth-error" id="forgotSuccess" style="color:var(--success, #2e7d32);"></p>
+        <p style="text-align:center; margin-top:14px;"><a href="#" id="backToLoginLink" style="font-size:0.85rem; color:var(--primary);">Back to Log In</a></p>
       </form>
     </div>
   </div>
@@ -154,7 +166,44 @@
     document.getElementById("tabSignup").classList.toggle("active", which === "signup");
     document.getElementById("panelLogin").classList.toggle("active", which === "login");
     document.getElementById("panelSignup").classList.toggle("active", which === "signup");
+    document.getElementById("panelForgot").classList.toggle("active", which === "forgot");
+    // tabs row stays hidden while the forgot-password panel is showing
+    document.querySelector(".auth-tabs").style.display = which === "forgot" ? "none" : "flex";
   }
+
+  document.getElementById("forgotPasswordLink").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("forgotError").style.display = "none";
+    document.getElementById("forgotSuccess").style.display = "none";
+    document.getElementById("forgotForm").reset();
+    switchTab("forgot");
+  });
+
+  document.getElementById("backToLoginLink").addEventListener("click", (e) => {
+    e.preventDefault();
+    switchTab("login");
+  });
+
+  document.getElementById("forgotForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const err = document.getElementById("forgotError");
+    const success = document.getElementById("forgotSuccess");
+    err.style.display = "none";
+    success.style.display = "none";
+    const email = document.getElementById("fpEmail").value.trim();
+    NurevaStore.Customer.resetPassword(email)
+      .then(() => {
+        success.textContent = "Reset link sent! Please check your email inbox (and spam folder).";
+        success.style.display = "block";
+      })
+      .catch(ex => {
+        let msg = "Could not send reset email. Please try again.";
+        if (ex.code === "auth/user-not-found") msg = "No account found with this email.";
+        else if (ex.code === "auth/invalid-email") msg = "Please enter a valid email address.";
+        err.textContent = msg;
+        err.style.display = "block";
+      });
+  });
 
   document.getElementById("loginForm").addEventListener("submit", (e) => {
     e.preventDefault();
