@@ -86,7 +86,7 @@ nav.main-nav a.active { color: var(--primary); }
 .search-panel button { flex-shrink: 0; background: var(--primary); color: var(--white); border: none; padding: 10px 20px; border-radius: var(--radius); font-weight: 600; }
 @media (max-width: 480px) {
   .search-panel .container { flex-direction: column; }
-  .search-panel input, .search-panel button { width: 100%; }
+  .search-panel input, .search-panel button { width: 100%; flex: none; }
 }
 #searchResults { max-height: 60vh; overflow-y: auto; border-top: 1px dashed rgba(59,31,50,0.15); }
 #searchResults a { display: flex; gap: 12px; padding: 10px 20px; align-items: center; border-bottom: 1px solid rgba(59,31,50,0.06); }
@@ -112,7 +112,7 @@ nav.main-nav a.active { color: var(--primary); }
 .btn-sm { padding: 9px 22px; font-size: 0.85rem; }
 
 /* ---------- homepage covers (2 fixed covers, photo itself is the link) ---------- */
-.covers-section { padding: 18px 0 6px; background: var(--primary); }
+.covers-section { padding: 18px 0 6px; background: var(--white); }
 .covers-grid { display: flex; flex-direction: column; gap: 22px; }
 .cover-block { display: flex; flex-direction: column; align-items: center; }
 .cover-card { display: block; width: 100%; border-radius: 18px; overflow: hidden; box-shadow: var(--shadow-lg); }
@@ -120,6 +120,11 @@ nav.main-nav a.active { color: var(--primary); }
 /* cover 1 (top, big) matches 1586x992 photo; cover 2 (bottom, small) matches 2062x763 photo */
 .cover-block:nth-child(1) .cover-card { aspect-ratio: 1586/992; }
 .cover-block:nth-child(2) .cover-card { aspect-ratio: 2062/763; }
+@media (max-width: 759px) {
+  /* keep covers from filling the whole screen so the floating contact button sits below them, not on top of them */
+  .cover-block:nth-child(1) .cover-card { max-height: 42vh; }
+  .cover-block:nth-child(2) .cover-card { max-height: 30vh; }
+}
 @media (min-width: 760px) {
   .covers-grid { flex-direction: row; align-items: flex-start; }
   .cover-block { flex: 1; }
@@ -238,7 +243,7 @@ footer { background: #FFFFFF; color: #000000; margin-top: 40px; border-top: 1px 
 .lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(251,247,242,0.15); color: var(--ivory); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; }
 
 /* ---------- floating contact button ---------- */
-.fab-container { position: fixed; right: 20px; bottom: 72px; z-index: 999; display: flex; flex-direction: column-reverse; align-items: center; gap: 12px; pointer-events: auto; }
+.fab-container { position: fixed; right: 20px; bottom: 84px; z-index: 999; display: flex; flex-direction: column-reverse; align-items: center; gap: 12px; pointer-events: auto; }
 
 /* ---------- bottom navigation bar ---------- */
 body { padding-bottom: 64px; }
