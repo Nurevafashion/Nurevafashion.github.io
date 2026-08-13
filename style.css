@@ -232,7 +232,7 @@ footer { background: #FFFFFF; color: #000000; margin-top: 40px; border-top: 1px 
 .lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(251,247,242,0.15); color: var(--ivory); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; }
 
 /* ---------- floating contact button ---------- */
-.fab-container { position: fixed; right: 20px; bottom: 84px; z-index: 999; display: flex; flex-direction: column-reverse; align-items: center; gap: 12px; pointer-events: auto; }
+.fab-container { position: fixed; right: 20px; bottom: 84px; z-index: 999; display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; pointer-events: auto; }
 
 /* ---------- bottom navigation bar ---------- */
 body { padding-bottom: 64px; }
@@ -241,22 +241,21 @@ body { padding-bottom: 64px; }
 .bottom-nav a.active, .bottom-nav a:hover { color: var(--primary); }
 .bottom-nav a svg { width: 22px; height: 22px; }
 .bottom-nav .bn-badge { position: absolute; top: 3px; right: calc(50% - 20px); background: var(--gold); color: var(--primary); border-radius: 50%; width: 16px; height: 16px; font-size: 0.62rem; display: none; align-items: center; justify-content: center; font-weight: 700; }
-.fab-main { width: 58px; height: 54px; border-radius: 20px 20px 20px 6px; background: linear-gradient(155deg, #FFF9F1, #EDDCC3); color: #3B2A1E; border: 1px solid #E4CDA6; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 6px 14px rgba(80,55,20,0.28), inset 0 1px 1px rgba(255,255,255,0.6); cursor: pointer; touch-action: manipulation; }
+.fab-main, .fab-option { border: none; padding: 0; cursor: pointer; touch-action: manipulation; text-decoration: none; position: relative; background: linear-gradient(155deg, #FFFCF8, #F0DFC0); box-shadow: 0 7px 14px rgba(80,55,20,0.30), inset 0 1px 2px rgba(255,255,255,0.85), inset 0 -3px 5px rgba(180,140,90,0.18); }
+.fab-main::before, .fab-option::before { content: ""; position: absolute; inset: 4px; border-radius: inherit; background: linear-gradient(155deg, #FFFDFA, #FBF3E6); box-shadow: inset 0 1px 1px rgba(255,255,255,0.9); }
+.fab-main::after, .fab-option::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: no-repeat center / 46% url('assets/fab/fab-bubble.png'); }
+.fab-main { width: 60px; height: 64px; border-radius: 50% 50% 8px 50%; filter: drop-shadow(0 4px 8px rgba(80,55,20,0.18)); }
 .fab-main:active { transform: scale(0.94); }
-.fab-main svg { width: 24px; height: 24px; }
-.fab-dot { width: 6px; height: 6px; border-radius: 50%; background: #3B2A1E; animation: fabDotBounce 1.2s ease-in-out infinite; }
-.fab-dot:nth-child(1) { animation-delay: 0s; }
-.fab-dot:nth-child(2) { animation-delay: 0.15s; }
-.fab-dot:nth-child(3) { animation-delay: 0.3s; }
-.fab-dot:nth-child(4) { animation-delay: 0.45s; }
-@keyframes fabDotBounce {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-  30% { transform: translateY(-5px); opacity: 1; }
-}
-.fab-option { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(155deg, #FFF9F1, #EDDCC3); border: 1px solid #E4CDA6; color: #3B2A1E; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 14px rgba(80,55,20,0.25), inset 0 1px 1px rgba(255,255,255,0.6); opacity: 0; transform: translateY(10px) scale(0.7); pointer-events: none; transition: all 0.22s ease; text-decoration: none; }
+.fab-container.open .fab-main { border-radius: 50% 50% 8px 50%; }
+.fab-container.open .fab-main::after { background-image: url('assets/fab/fab-close.png'); }
+.fab-option { width: 50px; height: 50px; border-radius: 50%; opacity: 0; transform: translateY(10px) scale(0.7); pointer-events: none; transition: all 0.22s ease; filter: drop-shadow(0 4px 7px rgba(80,55,20,0.16)); }
+.fab-option::after { background-size: 44%; }
 .fab-option:active { transform: scale(0.92); }
-.fab-option svg { width: 21px; height: 21px; }
 .fab-container.open .fab-option { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+#fabWhatsapp::after { background-image: url('assets/fab/fab-whatsapp.png'); }
+#fabDetails::after { background-image: url('assets/fab/fab-details.png'); }
+#fabCall::after { background-image: url('assets/fab/fab-call.png'); }
+#fabMessenger::after { background-image: url('assets/fab/fab-message.png'); }
 
 /* ---------- responsive ---------- */
 @media (max-width: 980px) {
