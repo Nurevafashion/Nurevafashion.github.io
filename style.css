@@ -258,9 +258,18 @@ body { padding-bottom: 64px; }
 .bottom-nav a.active, .bottom-nav a:hover { color: var(--primary); }
 .bottom-nav a svg { width: 22px; height: 22px; }
 .bottom-nav .bn-badge { position: absolute; top: 3px; right: calc(50% - 20px); background: var(--gold); color: var(--primary); border-radius: 50%; width: 16px; height: 16px; font-size: 0.62rem; display: none; align-items: center; justify-content: center; font-weight: 700; }
-.fab-main { width: 58px; height: 54px; border-radius: 20px 20px 20px 6px; background: linear-gradient(155deg, #FFF9F1, #EDDCC3); color: #3B2A1E; border: 1px solid #E4CDA6; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 6px 14px rgba(80,55,20,0.28), inset 0 1px 1px rgba(255,255,255,0.6); cursor: pointer; touch-action: manipulation; }
+/* Clay-morphism teardrop launcher: an outer gold ring with an inset cream
+   body, matching the reference "puffy bubble" style. The ::after layer is
+   the visible cream face; the button background is the gold ring. */
+.fab-main { position: relative; width: 60px; height: 58px; padding: 0; border-radius: 46% 46% 46% 12%; background: linear-gradient(155deg, #E7C58C, #C9A063); border: none; color: #3B2A1E; cursor: pointer; touch-action: manipulation; box-shadow: 0 10px 22px rgba(80,55,20,0.32); transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), border-radius 0.35s ease; }
+.fab-main::after { content: ""; position: absolute; inset: 3px; border-radius: inherit; background: linear-gradient(155deg, #FFFDF8, #F3E6CC); box-shadow: inset 0 2px 2px rgba(255,255,255,0.85), inset 0 -4px 8px rgba(120,85,35,0.14); }
 .fab-main:active { transform: scale(0.94); }
-.fab-main svg { width: 24px; height: 24px; }
+.fab-main .fab-icon-wrap { position: relative; z-index: 1; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.fab-main svg { width: 22px; height: 22px; position: relative; z-index: 1; }
+.fab-icon-close { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; opacity: 0; transform: rotate(-45deg) scale(0.5); transition: all 0.3s cubic-bezier(.34,1.56,.64,1); }
+.fab-container.open .fab-main { border-radius: 50%; }
+.fab-container.open .fab-icon-dots { opacity: 0; transform: rotate(45deg) scale(0.5); }
+.fab-container.open .fab-icon-close { opacity: 1; transform: rotate(0deg) scale(1); }
 .fab-dot { width: 6px; height: 6px; border-radius: 50%; background: #3B2A1E; animation: fabDotBounce 1.2s ease-in-out infinite; }
 .fab-dot:nth-child(1) { animation-delay: 0s; }
 .fab-dot:nth-child(2) { animation-delay: 0.15s; }
@@ -270,10 +279,15 @@ body { padding-bottom: 64px; }
   0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
   30% { transform: translateY(-5px); opacity: 1; }
 }
-.fab-option { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(155deg, #FFF9F1, #EDDCC3); border: 1px solid #E4CDA6; color: #3B2A1E; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 14px rgba(80,55,20,0.25), inset 0 1px 1px rgba(255,255,255,0.6); opacity: 0; transform: translateY(10px) scale(0.7); pointer-events: none; transition: all 0.22s ease; text-decoration: none; font-family: inherit; cursor: pointer; touch-action: manipulation; }
-.fab-option:active { transform: scale(0.92); }
-.fab-option svg { width: 21px; height: 21px; }
-.fab-container.open .fab-option { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+.fab-option { position: relative; width: 50px; height: 50px; padding: 0; border-radius: 50%; background: linear-gradient(155deg, #E7C58C, #C9A063); border: none; color: #3B2A1E; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px rgba(80,55,20,0.28); opacity: 0; transform: translateY(14px) translateX(var(--fx, 0)) scale(0.4) rotate(var(--fr, -18deg)); pointer-events: none; transition: transform 0.5s cubic-bezier(.34,1.56,.64,1), opacity 0.32s ease; text-decoration: none; font-family: inherit; cursor: pointer; touch-action: manipulation; }
+.fab-option::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: linear-gradient(155deg, #FFFDF8, #F3E6CC); box-shadow: inset 0 2px 2px rgba(255,255,255,0.85), inset 0 -3px 6px rgba(120,85,35,0.14); }
+.fab-option svg { width: 20px; height: 20px; position: relative; z-index: 1; }
+.fab-option:active { transform: translateY(0) translateX(var(--fx, 0)) scale(0.92) !important; }
+.fab-container.open .fab-option { opacity: 1; transform: translateY(0) translateX(var(--fx, 0)) scale(1) rotate(0deg); pointer-events: auto; }
+.fab-option:nth-of-type(1) { --fx: 8px; --fr: 14deg; transition-delay: 0.03s; }
+.fab-option:nth-of-type(2) { --fx: -10px; --fr: -14deg; transition-delay: 0.08s; }
+.fab-option:nth-of-type(3) { --fx: 10px; --fr: 14deg; transition-delay: 0.13s; }
+.fab-option:nth-of-type(4) { --fx: -8px; --fr: -14deg; transition-delay: 0.18s; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 980px) {
