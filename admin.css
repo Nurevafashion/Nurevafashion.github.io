@@ -99,13 +99,16 @@
 /* ---------- filter chip (admin product filter) ---------- */
 .admin-body .filter-chip.active { background: var(--admin-pink); border-color: var(--admin-pink); color: #FFFFFF; }
 
-/* ---------- banner grid ---------- */
-.banner-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+/* ---------- cover grid ---------- */
+.banner-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
 .banner-slot { background: var(--white); border-radius: var(--radius); box-shadow: 0 6px 20px rgba(198,0,126,0.08); padding: 12px; text-align: center; }
-.banner-slot .preview { aspect-ratio: 4/5; border-radius: 3px; overflow: hidden; margin-bottom: 10px; background: var(--admin-pink-soft); }
+.banner-slot .preview { aspect-ratio: 16/10; border-radius: 3px; overflow: hidden; margin-bottom: 10px; background: var(--admin-pink-soft); }
 .banner-slot .preview img { width: 100%; height: 100%; object-fit: cover; }
 .banner-slot label { font-size: 0.8rem; font-weight: 600; color: #8A5875; display: block; margin-bottom: 6px; }
 .banner-slot input[type=file] { font-size: 0.75rem; width: 100%; }
+@media (max-width: 640px) {
+  .banner-grid { grid-template-columns: 1fr; }
+}
 
 /* ---------- order cards ---------- */
 .order-card { background: var(--white); border-radius: var(--radius); padding: 18px; box-shadow: 0 6px 20px rgba(198,0,126,0.08); margin-bottom: 16px; }

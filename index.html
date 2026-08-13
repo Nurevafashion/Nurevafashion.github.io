@@ -6,7 +6,7 @@
 <title>Nureva Fashion — Where Modesty Meets Elegance</title>
 <meta name="description" content="Nureva Fashion — premium Burqa, Three-Piece, Hijab and Panjabi collections online. Cash on delivery nationwide.">
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=13">
+<link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
 
@@ -58,14 +58,10 @@
   <div class="news-ticker-track"></div>
 </div>
 
-<section class="hero" style="padding:0">
-  <div id="heroSlider"></div>
-  <div class="hero-content">
-    <div>
-      <a href="products.html" class="btn btn-outline btn-sm">Shop Collection</a>
-    </div>
+<section class="covers-section">
+  <div class="container">
+    <div class="covers-grid" id="coversWrap"></div>
   </div>
-  <div class="hero-dots" id="heroDots"></div>
 </section>
 
 <section id="newArrivalsSection">
@@ -97,14 +93,14 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="firebase-config.js?v=13"></script>
-<script src="store.js?v=13"></script>
-<script src="site.js?v=13"></script>
+<script src="firebase-config.js?v=15"></script>
+<script src="store.js?v=15"></script>
+<script src="site.js?v=15"></script>
 <script>
   function renderHome() {
     applySettings();
     renderNewsTicker();
-    initHeroSlider();
+    renderCovers();
 
     const catImages = {};
     NurevaStore.CATEGORIES.forEach(c => {

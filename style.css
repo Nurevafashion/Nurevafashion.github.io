@@ -100,16 +100,7 @@ nav.main-nav a.active { color: var(--primary); }
 .drawer-overlay.open { opacity: 1; pointer-events: auto; }
 .drawer-close { background: none; border: none; color: var(--gold); font-size: 1.6rem; margin-bottom: 10px; }
 
-/* ---------- hero slider ---------- */
-.hero { position: relative; width: 100%; height: 52vh; min-height: 320px; overflow: hidden; background: var(--primary); }
-.hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease; background-size: cover; background-position: center; pointer-events: none; }
-.hero-slide.active { opacity: 1; pointer-events: auto; }
-.hero-slide::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.5) 100%); }
-.hero-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; text-align: center; color: var(--ivory); padding: 0 20px 60px; pointer-events: none; }
-.hero-content a, .hero-content button { pointer-events: auto; }
-.hero-content .eyebrow { color: var(--gold-soft); letter-spacing: 0.18em; font-size: 0.78rem; text-transform: uppercase; margin-bottom: 14px; }
-.hero-content h1 { font-family: var(--font-display); font-size: clamp(2rem, 6vw, 3.4rem); font-weight: 700; margin-bottom: 14px; text-shadow: 0 2px 18px rgba(0,0,0,0.25); }
-.hero-content p { max-width: 520px; margin: 0 auto 26px; opacity: 0.92; font-size: 1.02rem; }
+/* ---------- buttons ---------- */
 .btn { display: inline-block; padding: 13px 30px; border-radius: var(--radius); font-weight: 600; font-size: 0.95rem; border: 1.5px solid transparent; transition: all 0.2s ease; }
 .btn-gold { background: var(--gold); color: var(--primary); }
 .btn-gold:hover { background: var(--gold-soft); }
@@ -120,9 +111,18 @@ nav.main-nav a.active { color: var(--primary); }
 .btn-block { width: 100%; text-align: center; }
 .btn-sm { padding: 9px 22px; font-size: 0.85rem; }
 
-.hero-dots { position: absolute; z-index: 3; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
-.hero-dots button { width: 8px; height: 8px; border-radius: 50%; border: none; background: rgba(251,247,242,0.45); }
-.hero-dots button.active { background: var(--gold); width: 22px; border-radius: 4px; }
+/* ---------- homepage covers (2 fixed covers, each with its own button) ---------- */
+.covers-section { padding: 18px 0 6px; background: var(--primary); }
+.covers-grid { display: flex; flex-direction: column; gap: 22px; }
+.cover-block { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.cover-card { display: block; width: 100%; aspect-ratio: 4/3; border-radius: 18px; overflow: hidden; box-shadow: var(--shadow-lg); }
+.cover-card img { width: 100%; height: 100%; object-fit: cover; }
+.cover-btn { min-width: 220px; text-align: center; }
+@media (min-width: 760px) {
+  .covers-grid { flex-direction: row; align-items: flex-start; }
+  .cover-block { flex: 1; }
+  .cover-card { aspect-ratio: 4/3; }
+}
 
 /* ---------- news ticker ---------- */
 .news-ticker { background: var(--gold-soft); color: var(--primary); overflow: hidden; white-space: nowrap; padding: 8px 0; font-size: 0.88rem; font-weight: 600; }
@@ -272,7 +272,6 @@ body { padding-bottom: 64px; }
 @media (max-width: 760px) {
   nav.main-nav { display: none; }
   .menu-toggle { display: block; }
-  .hero { height: 60vh; }
 }
 @media (max-width: 480px) {
   .cat-grid, .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }

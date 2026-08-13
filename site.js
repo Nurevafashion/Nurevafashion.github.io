@@ -71,30 +71,22 @@ function closeLightbox() {
   if (el) el.classList.remove("open");
 }
 
-/* ---------- hero slider ---------- */
-let _heroInterval = null, _heroCurrent = 0;
-function initHeroSlider() {
-  const wrap = document.getElementById("heroSlider");
-  const dotsWrap = document.getElementById("heroDots");
+/* ---------- homepage covers (2 fixed covers, each with its own Collection button) ---------- */
+function renderCovers() {
+  const wrap = document.getElementById("coversWrap");
   if (!wrap) return;
-  const banners = NurevaStore.Banners.all();
-  if (!banners.length) { wrap.innerHTML = ""; if (dotsWrap) dotsWrap.innerHTML = ""; return; }
-  wrap.innerHTML = banners.map((src, i) => `<div class="hero-slide ${i === 0 ? "active" : ""}" data-src="${src}" style="background-image:url('${src}')"></div>`).join("");
-  if (dotsWrap) dotsWrap.innerHTML = banners.map((_, i) => `<button data-i="${i}" class="${i === 0 ? "active" : ""}" aria-label="Slide ${i + 1}"></button>`).join("");
-  _heroCurrent = 0;
-  const slides = wrap.querySelectorAll(".hero-slide");
-  const dots = dotsWrap ? dotsWrap.querySelectorAll("button") : [];
-  slides.forEach(s => { s.style.cursor = "zoom-in"; s.addEventListener("click", () => openLightbox(s.dataset.src)); });
-  function show(i) {
-    slides.forEach(s => s.classList.remove("active"));
-    dots.forEach(d => d.classList.remove("active"));
-    slides[i].classList.add("active");
-    if (dots[i]) dots[i].classList.add("active");
-    _heroCurrent = i;
-  }
-  dots.forEach(d => d.addEventListener("click", (e) => { e.stopPropagation(); show(Number(d.dataset.i)); }));
-  if (_heroInterval) clearInterval(_heroInterval);
-  _heroInterval = setInterval(() => show((_heroCurrent + 1) % slides.length), 3000);
+  const covers = NurevaStore.Covers.all();
+  if (!covers.length) { wrap.innerHTML = ""; return; }
+  wrap.innerHTML = covers.map(c => {
+    const link = c.link || "products.html";
+    return `
+    <div class="cover-block">
+      <a href="${link}" class="cover-card">
+        <img src="${c.image}" alt="Cover">
+      </a>
+      <a href="${link}" class="btn btn-gold btn-sm cover-btn">Shop Collection</a>
+    </div>`;
+  }).join("");
 }
 
 /* ---------- news ticker ---------- */

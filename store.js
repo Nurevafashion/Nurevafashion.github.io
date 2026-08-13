@@ -67,8 +67,8 @@ const NurevaStore = (() => {
   }
 
   /* ---------- in-memory cache, kept in sync via Firestore realtime listeners ---------- */
-  const cache = { products: [], banners: [], news: [], settings: defaultSettings(), orders: [] };
-  const flags = { products: false, banners: false, news: false, settings: false };
+  const cache = { products: [], covers: [], news: [], settings: defaultSettings(), orders: [] };
+  const flags = { products: false, covers: false, news: false, settings: false };
   const listeners = [];
   let resolveReady;
   const ready = new Promise(res => { resolveReady = res; });
@@ -81,8 +81,8 @@ const NurevaStore = (() => {
     err => { console.error("products sync error:", err); flags.products = true; checkReady(); }
   );
   db.collection("banners").doc("main").onSnapshot(
-    doc => { cache.banners = doc.exists ? (doc.data().images || []) : []; flags.banners = true; checkReady(); notify(); },
-    err => { console.error("banners sync error:", err); flags.banners = true; checkReady(); }
+    doc => { cache.covers = doc.exists ? (doc.data().covers || []) : []; flags.covers = true; checkReady(); notify(); },
+    err => { console.error("covers sync error:", err); flags.covers = true; checkReady(); }
   );
   db.collection("news").orderBy("date", "desc").onSnapshot(
     snap => { cache.news = snap.docs.map(d => ({ id: d.id, ...d.data() })); flags.news = true; checkReady(); notify(); },
@@ -115,10 +115,10 @@ const NurevaStore = (() => {
     remove: (id) => db.collection("products").doc(id).delete(),
   };
 
-  /* ---------- Banners ---------- */
-  const Banners = {
-    all: () => cache.banners,
-    set: (arr) => db.collection("banners").doc("main").set({ images: arr }),
+  /* ---------- Covers (2 fixed homepage covers, each with its own link) ---------- */
+  const Covers = {
+    all: () => cache.covers,
+    set: (arr) => db.collection("banners").doc("main").set({ covers: arr }),
   };
 
   /* ---------- News ---------- */
@@ -215,11 +215,13 @@ const NurevaStore = (() => {
         id++;
       });
     });
-    const bannerLabels = ["Nureva Fashion", "New Collection 2026", "Premium Burqa", "Limited Time Offer"];
-    batch.set(db.collection("banners").doc("main"), { images: bannerLabels.map((l, i) => placeholderImage(l, "banner" + i)) });
+    const coverLabels = ["Nureva Fashion", "New Collection 2026"];
+    batch.set(db.collection("banners").doc("main"), {
+      covers: coverLabels.map((l, i) => ({ image: placeholderImage(l, "cover" + i), link: "products.html" })),
+    });
     batch.set(db.collection("settings").doc("general"), defaultSettings(), { merge: true });
     return batch.commit();
   }
 
-  return { CATEGORIES, ready, onChange, Products, Banners, News, Settings, Orders, Admin, Customer, placeholderImage, compressImage, seedDemoData };
+  return { CATEGORIES, ready, onChange, Products, Covers, News, Settings, Orders, Admin, Customer, placeholderImage, compressImage, seedDemoData };
 })();

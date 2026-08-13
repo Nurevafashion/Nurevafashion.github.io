@@ -92,7 +92,7 @@ function renderDashboard() {
     document.getElementById("recentOrders").insertAdjacentHTML("beforeend",
       `<div style="margin-top:16px"><button class="btn btn-outline" id="seedDemoBtn">Add sample demo products</button></div>`);
     document.getElementById("seedDemoBtn")?.addEventListener("click", () => {
-      if (confirm("This adds sample products, 4 cover banners and default settings. Continue?")) {
+      if (confirm("This adds sample products, 2 cover images and default settings. Continue?")) {
         NurevaStore.seedDemoData().then(() => toastAdmin("Demo data added")).catch(err => alert(err.message));
       }
     });
@@ -227,27 +227,44 @@ function renderImagePreview() {
   }));
 }
 
-/* ---------- Banners ---------- */
+/* ---------- Covers (2 fixed homepage covers, each with its own image + link) ---------- */
 function renderBanners() {
-  const banners = NurevaStore.Banners.all();
+  const covers = NurevaStore.Covers.all();
   const grid = document.getElementById("bannerGrid");
-  grid.innerHTML = [0, 1, 2, 3].map(i => `
+  grid.innerHTML = [0, 1].map(i => {
+    const c = covers[i] || {};
+    return `
     <div class="banner-slot">
-      <label>Slide ${i + 1}</label>
-      <div class="preview"><img src="${banners[i] || NurevaStore.placeholderImage("Slide " + (i + 1))}"></div>
+      <label>Cover ${i + 1}</label>
+      <div class="preview"><img src="${c.image || NurevaStore.placeholderImage("Cover " + (i + 1))}"></div>
       <input type="file" accept="image/*" data-i="${i}" class="banner-input">
+      <div class="form-group" style="margin-top:10px; text-align:left;">
+        <label>Collection button link</label>
+        <input type="text" data-i="${i}" class="banner-link-input" placeholder="e.g. products.html or offers.html" value="${c.link || "products.html"}">
+      </div>
     </div>
-  `).join("");
+  `;
+  }).join("");
   grid.querySelectorAll(".banner-input").forEach(inp => inp.addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     try {
       const compressed = await NurevaStore.compressImage(file, 900, 0.7);
-      const arr = NurevaStore.Banners.all().slice();
-      arr[Number(inp.dataset.i)] = compressed;
-      await NurevaStore.Banners.set(arr);
+      const arr = NurevaStore.Covers.all().slice();
+      const i = Number(inp.dataset.i);
+      arr[i] = { ...(arr[i] || {}), image: compressed, link: arr[i]?.link || "products.html" };
+      await NurevaStore.Covers.set(arr);
       renderBanners();
       toastAdmin("Cover image updated");
+    } catch (err) { alert(err.message); }
+  }));
+  grid.querySelectorAll(".banner-link-input").forEach(inp => inp.addEventListener("change", async (e) => {
+    try {
+      const arr = NurevaStore.Covers.all().slice();
+      const i = Number(inp.dataset.i);
+      arr[i] = { ...(arr[i] || {}), link: inp.value.trim() || "products.html" };
+      await NurevaStore.Covers.set(arr);
+      toastAdmin("Cover link updated");
     } catch (err) { alert(err.message); }
   }));
 }
