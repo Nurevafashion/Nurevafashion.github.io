@@ -234,7 +234,7 @@ footer { background: #FFFFFF; color: #000000; margin-top: 40px; border-top: 1px 
 .lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(251,247,242,0.15); color: var(--ivory); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; }
 
 /* ---------- floating contact button ---------- */
-.fab-container { position: fixed; right: 20px; bottom: 84px; z-index: 999; display: flex; flex-direction: column-reverse; align-items: center; gap: 12px; pointer-events: auto; }
+.fab-container { position: fixed; right: 20px; bottom: 72px; z-index: 999; display: flex; flex-direction: column-reverse; align-items: center; gap: 12px; pointer-events: auto; }
 
 /* ---------- bottom navigation bar ---------- */
 body { padding-bottom: 64px; }
