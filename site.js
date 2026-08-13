@@ -279,4 +279,27 @@ function initBottomNav() {
   updateCartBadge();
 }
 
-document.addEventListener("DOMContentLoaded", () => { initHeader(); initFab(); initBottomNav(); });
+/* ---------- scroll-to-top button ---------- */
+function initScrollTop() {
+  if (document.getElementById("scrollTopBtn")) return;
+  const btn = document.createElement("button");
+  btn.id = "scrollTopBtn";
+  btn.type = "button";
+  btn.className = "scroll-top-btn";
+  btn.setAttribute("aria-label", "Scroll to top");
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 15 12 9 18 15"/></svg>`;
+  document.body.appendChild(btn);
+
+  function toggleVisibility() {
+    if (window.scrollY > 400) btn.classList.add("show");
+    else btn.classList.remove("show");
+  }
+  window.addEventListener("scroll", toggleVisibility, { passive: true });
+  toggleVisibility();
+
+  btn.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => { initHeader(); initFab(); initBottomNav(); initScrollTop(); });

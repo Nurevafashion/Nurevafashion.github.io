@@ -121,9 +121,9 @@ nav.main-nav a.active { color: var(--primary); }
 .cover-block:nth-child(1) .cover-card { aspect-ratio: 1586/992; }
 .cover-block:nth-child(2) .cover-card { aspect-ratio: 2062/763; }
 @media (max-width: 759px) {
-  /* keep covers from filling the whole screen so the floating contact button sits below them, not on top of them */
-  .cover-block:nth-child(1) .cover-card { max-height: 42vh; }
-  .cover-block:nth-child(2) .cover-card { max-height: 30vh; }
+  /* keep covers from filling the whole screen so the floating contact button (fixed near the bottom) never sits on top of them */
+  .cover-block:nth-child(1) .cover-card { max-height: 34vh; }
+  .cover-block:nth-child(2) .cover-card { max-height: 24vh; }
 }
 @media (min-width: 760px) {
   .covers-grid { flex-direction: row; align-items: flex-start; }
@@ -243,7 +243,13 @@ footer { background: #FFFFFF; color: #000000; margin-top: 40px; border-top: 1px 
 .lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(251,247,242,0.15); color: var(--ivory); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; }
 
 /* ---------- floating contact button ---------- */
-.fab-container { position: fixed; right: 20px; bottom: 84px; z-index: 999; display: flex; flex-direction: column-reverse; align-items: center; gap: 12px; pointer-events: auto; }
+.fab-container { position: fixed; right: 20px; bottom: 78px; z-index: 999; display: flex; flex-direction: column-reverse; align-items: center; gap: 12px; pointer-events: auto; }
+
+/* ---------- scroll-to-top button ---------- */
+.scroll-top-btn { position: fixed; right: 20px; bottom: 148px; z-index: 998; width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(155deg, #FFF9F1, #EDDCC3); border: 1px solid #E4CDA6; color: #3B2A1E; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 14px rgba(80,55,20,0.25), inset 0 1px 1px rgba(255,255,255,0.6); cursor: pointer; touch-action: manipulation; opacity: 0; transform: translateY(10px) scale(0.8); pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease; }
+.scroll-top-btn.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+.scroll-top-btn:active { transform: scale(0.92); }
+.scroll-top-btn svg { width: 22px; height: 22px; }
 
 /* ---------- bottom navigation bar ---------- */
 body { padding-bottom: 64px; }
