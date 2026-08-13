@@ -9,7 +9,7 @@
    ============================================================ */
 
 const NurevaStore = (() => {
-  const CATEGORIES = ["Burqa", "Three-Piece", "Hijab", "Panjabi"];
+  const CATEGORIES = ["Burqa", "Three-Piece", "Hijab", "Panjabi", "Nureva Signature"];
 
   /* ---------- placeholder image (SVG) ---------- */
   function hashCode(str) { let h = 0; for (let i = 0; i < String(str).length; i++) { h = (h << 5) - h + str.charCodeAt(i); h |= 0; } return h; }

@@ -227,21 +227,19 @@ function renderImagePreview() {
   }));
 }
 
-/* ---------- Covers (2 fixed homepage covers, each with its own image + link) ---------- */
+/* ---------- Covers (2 fixed homepage covers: cover 1 -> Nureva Signature, cover 2 -> Offers) ---------- */
+const COVER_LINKS = ["products.html?cat=Nureva%20Signature", "offers.html"];
 function renderBanners() {
   const covers = NurevaStore.Covers.all();
   const grid = document.getElementById("bannerGrid");
   grid.innerHTML = [0, 1].map(i => {
     const c = covers[i] || {};
+    const dest = i === 0 ? "Nureva Signature" : "Offers";
     return `
     <div class="banner-slot">
-      <label>Cover ${i + 1}</label>
+      <label>Cover ${i + 1} <small style="font-weight:400;color:#8A5875">(opens ${dest} when clicked)</small></label>
       <div class="preview"><img src="${c.image || NurevaStore.placeholderImage("Cover " + (i + 1))}"></div>
       <input type="file" accept="image/*" data-i="${i}" class="banner-input">
-      <div class="form-group" style="margin-top:10px; text-align:left;">
-        <label>Collection button link</label>
-        <input type="text" data-i="${i}" class="banner-link-input" placeholder="e.g. products.html or offers.html" value="${c.link || "products.html"}">
-      </div>
     </div>
   `;
   }).join("");
@@ -252,19 +250,10 @@ function renderBanners() {
       const compressed = await NurevaStore.compressImage(file, 900, 0.7);
       const arr = NurevaStore.Covers.all().slice();
       const i = Number(inp.dataset.i);
-      arr[i] = { ...(arr[i] || {}), image: compressed, link: arr[i]?.link || "products.html" };
+      arr[i] = { ...(arr[i] || {}), image: compressed, link: COVER_LINKS[i] };
       await NurevaStore.Covers.set(arr);
       renderBanners();
       toastAdmin("Cover image updated");
-    } catch (err) { alert(err.message); }
-  }));
-  grid.querySelectorAll(".banner-link-input").forEach(inp => inp.addEventListener("change", async (e) => {
-    try {
-      const arr = NurevaStore.Covers.all().slice();
-      const i = Number(inp.dataset.i);
-      arr[i] = { ...(arr[i] || {}), link: inp.value.trim() || "products.html" };
-      await NurevaStore.Covers.set(arr);
-      toastAdmin("Cover link updated");
     } catch (err) { alert(err.message); }
   }));
 }

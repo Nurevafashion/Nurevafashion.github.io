@@ -111,17 +111,18 @@ nav.main-nav a.active { color: var(--primary); }
 .btn-block { width: 100%; text-align: center; }
 .btn-sm { padding: 9px 22px; font-size: 0.85rem; }
 
-/* ---------- homepage covers (2 fixed covers, each with its own button) ---------- */
+/* ---------- homepage covers (2 fixed covers, photo itself is the link) ---------- */
 .covers-section { padding: 18px 0 6px; background: var(--primary); }
 .covers-grid { display: flex; flex-direction: column; gap: 22px; }
-.cover-block { display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.cover-card { display: block; width: 100%; aspect-ratio: 4/3; border-radius: 18px; overflow: hidden; box-shadow: var(--shadow-lg); }
+.cover-block { display: flex; flex-direction: column; align-items: center; }
+.cover-card { display: block; width: 100%; border-radius: 18px; overflow: hidden; box-shadow: var(--shadow-lg); }
 .cover-card img { width: 100%; height: 100%; object-fit: cover; }
-.cover-btn { min-width: 220px; text-align: center; }
+/* cover 1 (top, big) matches 1586x992 photo; cover 2 (bottom, small) matches 2062x763 photo */
+.cover-block:nth-child(1) .cover-card { aspect-ratio: 1586/992; }
+.cover-block:nth-child(2) .cover-card { aspect-ratio: 2062/763; }
 @media (min-width: 760px) {
   .covers-grid { flex-direction: row; align-items: flex-start; }
   .cover-block { flex: 1; }
-  .cover-card { aspect-ratio: 4/3; }
 }
 
 /* ---------- news ticker ---------- */

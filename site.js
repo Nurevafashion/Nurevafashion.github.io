@@ -77,14 +77,14 @@ function renderCovers() {
   if (!wrap) return;
   const covers = NurevaStore.Covers.all();
   if (!covers.length) { wrap.innerHTML = ""; return; }
-  wrap.innerHTML = covers.map(c => {
-    const link = c.link || "products.html";
+  const coverLinks = ["products.html?cat=Nureva%20Signature", "offers.html"];
+  wrap.innerHTML = covers.map((c, i) => {
+    const link = coverLinks[i] || "products.html";
     return `
     <div class="cover-block">
       <a href="${link}" class="cover-card">
         <img src="${c.image}" alt="Cover">
       </a>
-      <a href="${link}" class="btn btn-gold btn-sm cover-btn">Shop Collection</a>
     </div>`;
   }).join("");
 }
