@@ -333,6 +333,7 @@ function renderSettings() {
   document.getElementById("setTagline").value = s.tagline || "";
   document.getElementById("setFacebook").value = s.facebook || "";
   document.getElementById("setInstagram").value = s.instagram || "";
+  document.getElementById("setMessenger").value = s.messenger || "";
   document.getElementById("setPhone").value = s.phone || "";
   document.getElementById("setWhatsapp").value = s.whatsapp || "";
   document.getElementById("setAddress").value = s.address || "";
@@ -346,6 +347,7 @@ document.getElementById("settingsForm")?.addEventListener("submit", (e) => {
     tagline: document.getElementById("setTagline").value,
     facebook: document.getElementById("setFacebook").value,
     instagram: document.getElementById("setInstagram").value,
+    messenger: document.getElementById("setMessenger").value,
     phone: document.getElementById("setPhone").value,
     whatsapp: document.getElementById("setWhatsapp").value,
     address: document.getElementById("setAddress").value,

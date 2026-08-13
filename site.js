@@ -171,7 +171,7 @@ function renderFooter(minimal) {
           <p>Your trusted destination for premium Burqa, Three-Piece, Hijab and Panjabi.</p>
           <div class="social-row">
             <a href="${s.facebook || '#'}" target="_blank" rel="noopener" aria-label="Facebook">f</a>
-            ${s.instagram ? `<a class="ig" href="${s.instagram}" target="_blank" rel="noopener" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>` : ""}
+            ${s.instagram ? `<a class="ig" href="${s.instagram}" target="_blank" rel="noopener" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2c2.717 0 3.056.01 4.122.06 1.065.05 1.79.217 2.428.465.66.254 1.216.598 1.772 1.153a4.908 4.908 0 0 1 1.153 1.772c.247.637.415 1.363.465 2.428.047 1.066.06 1.405.06 4.122 0 2.717-.01 3.056-.06 4.122-.05 1.065-.218 1.79-.465 2.428a4.883 4.883 0 0 1-1.153 1.772 4.915 4.915 0 0 1-1.772 1.153c-.637.247-1.363.415-2.428.465-1.066.047-1.405.06-4.122.06-2.717 0-3.056-.01-4.122-.06-1.065-.05-1.79-.218-2.428-.465a4.89 4.89 0 0 1-1.772-1.153 4.904 4.904 0 0 1-1.153-1.772c-.248-.637-.415-1.363-.465-2.428C2.013 15.056 2 14.717 2 12c0-2.717.01-3.056.06-4.122.05-1.066.217-1.79.465-2.428a4.88 4.88 0 0 1 1.153-1.772A4.897 4.897 0 0 1 5.45 2.525c.638-.248 1.362-.415 2.428-.465C8.944 2.013 9.283 2 12 2zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 8.25a3.25 3.25 0 1 1 0-6.5 3.25 3.25 0 0 1 0 6.5zM17.5 6.75a1.25 1.25 0 1 0 0-2.5 1.25 1.25 0 0 0 0 2.5z"/></svg></a>` : ""}
           </div>
         </div>`;
   const shopCol = `
@@ -216,35 +216,41 @@ function initFab() {
   wrap.id = "siteFab";
   wrap.className = "fab-container";
   wrap.innerHTML = `
-    <a class="fab-option" id="fabDetails" href="contact.html" aria-label="Details">ℹ️</a>
-    <a class="fab-option" id="fabWhatsapp" href="#" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
-    <a class="fab-option" id="fabCall" href="#" aria-label="Call">📞</a>
-    <button class="fab-main" id="fabToggle" type="button" aria-label="Contact us" onclick="window.__toggleFab(event)"><span>⋯</span></button>
+    <a class="fab-option" id="fabDetails" href="contact.html" aria-label="Details">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/></svg>
+    </a>
+    <a class="fab-option" id="fabMessenger" href="#" target="_blank" rel="noopener" aria-label="Messenger">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12c0-4.97 4.03-9 9-9s9 4.03 9 9-4.03 9-9 9c-1.13 0-2.21-.21-3.2-.59L4 21l1.59-4.8A8.96 8.96 0 0 1 4 12z"/></svg>
+    </a>
+    <a class="fab-option" id="fabWhatsapp" href="#" target="_blank" rel="noopener" aria-label="WhatsApp">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+    </a>
+    <a class="fab-option" id="fabCall" href="#" aria-label="Call">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    </a>
+    <button class="fab-main" id="fabToggle" type="button" aria-label="Contact us">
+      <span class="fab-dot"></span><span class="fab-dot"></span><span class="fab-dot"></span><span class="fab-dot"></span>
+    </button>
   `;
   document.body.appendChild(wrap);
 
-  window.__toggleFab = function (e) {
-    if (e) e.stopPropagation();
+  const toggle = document.getElementById("fabToggle");
+  toggle.onclick = function (e) {
+    e.stopPropagation();
     wrap.classList.toggle("open");
-    const s = wrap.querySelector("#fabToggle span");
-    if (s) s.textContent = wrap.classList.contains("open") ? "✕" : "⋯";
   };
-  document.addEventListener("click", (e) => {
-    if (wrap.classList.contains("open") && !wrap.contains(e.target)) {
-      wrap.classList.remove("open");
-      const s = wrap.querySelector("#fabToggle span");
-      if (s) s.textContent = "⋯";
-    }
-  });
 
   function applyFabLinks() {
     const s = NurevaStore.Settings.get();
     const callBtn = document.getElementById("fabCall");
     const waBtn = document.getElementById("fabWhatsapp");
+    const mgBtn = document.getElementById("fabMessenger");
     if (s.phone) { callBtn.href = "tel:" + s.phone; callBtn.style.display = ""; }
     else { callBtn.style.display = "none"; }
     if (s.whatsapp) { waBtn.href = `https://wa.me/${s.whatsapp}`; waBtn.style.display = ""; }
     else { waBtn.style.display = "none"; }
+    if (s.messenger) { mgBtn.href = s.messenger; mgBtn.style.display = ""; }
+    else { mgBtn.style.display = "none"; }
   }
   if (window.NurevaStore) { NurevaStore.ready.then(applyFabLinks); NurevaStore.onChange(applyFabLinks); }
 }

@@ -57,6 +57,7 @@ const NurevaStore = (() => {
       tagline: "Where Modesty Meets Elegance",
       facebook: "https://facebook.com/Nurevafashion",
       instagram: "",
+      messenger: "",
       whatsapp: "",
       phone: "",
       address: "Dhaka, Bangladesh",
