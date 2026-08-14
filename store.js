@@ -198,6 +198,58 @@ const NurevaStore = (() => {
     },
   };
 
+  /* ---------- Live Chat (customer <-> admin, Firestore realtime) ----------
+     chats/{id}            : { name, email, createdAt, lastMessage, lastMessageAt,
+                                lastSender, adminUnread, customerUnread, customerLastSeen }
+     chats/{id}/messages/* : { sender: "customer"|"admin", text, at }
+     A customer's own chat id is kept in localStorage so returning visitors
+     continue the same conversation. The full "chats" collection is only ever
+     listened to from the admin panel (listenAllChats); customer pages only
+     ever read/write their own single chat document. */
+  const CHAT_ONLINE_MS = 45000;
+  const Chat = {
+    ONLINE_MS: CHAT_ONLINE_MS,
+    isOnline: (chat) => !!(chat && chat.customerLastSeen && (Date.now() - chat.customerLastSeen) < CHAT_ONLINE_MS),
+    getMyChatId: () => { try { return localStorage.getItem("nurevaChatId"); } catch (e) { return null; } },
+    start: (name, email) => {
+      return db.collection("chats").add({
+        name: (name || "").trim(), email: (email || "").trim(),
+        createdAt: Date.now(), lastMessage: "", lastMessageAt: Date.now(),
+        lastSender: "customer", adminUnread: false, customerUnread: false,
+        customerLastSeen: Date.now(),
+      }).then(ref => {
+        try { localStorage.setItem("nurevaChatId", ref.id); } catch (e) {}
+        return ref.id;
+      });
+    },
+    sendMessage: (chatId, sender, text) => {
+      const now = Date.now();
+      const batch = db.batch();
+      const msgRef = db.collection("chats").doc(chatId).collection("messages").doc();
+      batch.set(msgRef, { sender, text: String(text).trim(), at: now });
+      const patch = { lastMessage: String(text).trim(), lastMessageAt: now, lastSender: sender };
+      if (sender === "customer") { patch.adminUnread = true; patch.customerLastSeen = now; }
+      else { patch.customerUnread = true; }
+      batch.update(db.collection("chats").doc(chatId), patch);
+      return batch.commit();
+    },
+    listenMessages: (chatId, cb) => db.collection("chats").doc(chatId).collection("messages").orderBy("at", "asc")
+      .onSnapshot(snap => cb(snap.docs.map(d => ({ id: d.id, ...d.data() }))), err => console.error("chat messages sync error:", err)),
+    listenChat: (chatId, cb) => db.collection("chats").doc(chatId)
+      .onSnapshot(doc => cb(doc.exists ? { id: doc.id, ...doc.data() } : null), err => console.error("chat sync error:", err)),
+    listenAllChats: (cb) => db.collection("chats").orderBy("lastMessageAt", "desc")
+      .onSnapshot(snap => cb(snap.docs.map(d => ({ id: d.id, ...d.data() }))), err => console.error("chats sync error:", err)),
+    markCustomerRead: (chatId) => chatId ? db.collection("chats").doc(chatId).update({ customerUnread: false }).catch(() => {}) : Promise.resolve(),
+    markAdminRead: (chatId) => chatId ? db.collection("chats").doc(chatId).update({ adminUnread: false }).catch(() => {}) : Promise.resolve(),
+    heartbeat: (chatId) => chatId ? db.collection("chats").doc(chatId).update({ customerLastSeen: Date.now() }).catch(() => {}) : Promise.resolve(),
+    deleteChat: (chatId) => db.collection("chats").doc(chatId).collection("messages").get().then(snap => {
+      const batch = db.batch();
+      snap.docs.forEach(d => batch.delete(d.ref));
+      batch.delete(db.collection("chats").doc(chatId));
+      return batch.commit();
+    }),
+  };
+
   /* ---------- demo data (optionally added once from the admin panel) ---------- */
   function seedDemoData() {
     const names = {
@@ -236,5 +288,5 @@ const NurevaStore = (() => {
     return batch.commit();
   }
 
-  return { CATEGORIES, ready, isReady: () => Object.values(flags).every(Boolean), onChange, Products, Covers, News, Settings, Orders, Admin, Customer, placeholderImage, compressImage, seedDemoData };
+  return { CATEGORIES, ready, isReady: () => Object.values(flags).every(Boolean), onChange, Products, Covers, News, Settings, Orders, Admin, Customer, Chat, placeholderImage, compressImage, seedDemoData };
 })();

@@ -51,6 +51,7 @@ if (isLoginPage) {
     if (!isLoggedIn) { location.href = "admin.html"; return; }
     NurevaStore.ready.then(renderCurrentPage);
     NurevaStore.onChange(renderCurrentPage);
+    initChatSync();
   });
 }
 
@@ -379,6 +380,137 @@ document.getElementById("passwordForm")?.addEventListener("submit", (e) => {
     .then(() => { document.getElementById("passwordForm").reset(); toastAdmin("Password changed"); })
     .catch(err => alert(err.message + " (you may need to log out and log back in, then try again — Firebase requires a recent login to change your password)"));
 });
+
+/* ---------- Live Chat (admin) ---------- */
+let allChats = [];
+let selectedChatId = null;
+let chatMessagesUnsub = null;
+let chatOnlineTimer = null;
+
+function escapeAdminChat(s) { return String(s).replace(/[<>&]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c])); }
+function timeAgoShort(ms) {
+  const diff = Date.now() - ms;
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "now";
+  if (m < 60) return m + "m";
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + "h";
+  return Math.floor(h / 24) + "d";
+}
+
+function updateChatBadge() {
+  const count = allChats.filter(c => c.adminUnread).length;
+  const navBadge = document.getElementById("navChatBadge");
+  if (navBadge) { navBadge.textContent = count; navBadge.style.display = count ? "inline-flex" : "none"; }
+  const strip = document.getElementById("chatNewMsgBadge");
+  if (strip) {
+    strip.style.display = count ? "inline-block" : "none";
+    strip.innerHTML = `🔔 ${count} New Message${count === 1 ? "" : "s"}`;
+  }
+  const totalBadge = document.getElementById("chatTotalBadge");
+  if (totalBadge) { totalBadge.textContent = count; totalBadge.style.display = count ? "inline-flex" : "none"; }
+}
+
+function renderChatCustomerList() {
+  const wrap = document.getElementById("chatCustomers");
+  if (!wrap) return;
+  if (!allChats.length) { wrap.innerHTML = `<p style="padding:16px;color:#8A5875">No conversations yet</p>`; return; }
+  wrap.innerHTML = allChats.map(c => `
+    <div class="chat-cust-item ${c.id === selectedChatId ? "active" : ""} ${c.adminUnread ? "unread" : ""}" data-id="${c.id}">
+      <div class="chat-cust-avatar">${(c.name || "?").charAt(0).toUpperCase()}<span class="chat-online-dot ${NurevaStore.Chat.isOnline(c) ? "online" : ""}"></span></div>
+      <div class="chat-cust-info">
+        <div class="chat-cust-name">${c.name || "Unknown"} ${c.adminUnread ? '<span class="chat-unread-dot"></span>' : ""}</div>
+        <div class="chat-cust-preview">${c.lastSender === "admin" ? "You: " : ""}${c.lastMessage || ""}</div>
+      </div>
+      <div class="chat-cust-time">${c.lastMessageAt ? timeAgoShort(c.lastMessageAt) : ""}</div>
+    </div>
+  `).join("");
+  wrap.querySelectorAll(".chat-cust-item").forEach(el => el.addEventListener("click", () => openChatConversation(el.dataset.id)));
+}
+
+function renderConvStatus(chat) {
+  const el = document.getElementById("chatConvStatus");
+  if (!el || !chat) return;
+  const online = NurevaStore.Chat.isOnline(chat);
+  el.innerHTML = `<span class="chat-online-dot ${online ? "online" : ""}"></span> ${online ? "Online" : "Offline"}${chat.email ? " · " + chat.email : ""}`;
+}
+
+function openChatConversation(chatId) {
+  selectedChatId = chatId;
+  const chat = allChats.find(c => c.id === chatId);
+  if (!chat) return;
+  document.getElementById("chatConvEmpty").style.display = "none";
+  document.getElementById("chatConvActive").style.display = "flex";
+  document.querySelector(".chat-admin-layout")?.classList.add("mobile-conv-open");
+  document.getElementById("chatConvName").textContent = chat.name || "Unknown";
+  renderConvStatus(chat);
+  renderChatCustomerList();
+  NurevaStore.Chat.markAdminRead(chatId);
+  if (chatMessagesUnsub) chatMessagesUnsub();
+  chatMessagesUnsub = NurevaStore.Chat.listenMessages(chatId, (msgs) => {
+    renderChatConvMessages(msgs);
+    NurevaStore.Chat.markAdminRead(chatId);
+  });
+}
+
+function renderChatConvMessages(msgs) {
+  const el = document.getElementById("chatConvMessages");
+  if (!el) return;
+  el.innerHTML = msgs.length ? msgs.map(m => `
+    <div class="chat-bubble ${m.sender === "admin" ? "from-admin" : "from-customer"}">
+      <div class="chat-bubble-text">${escapeAdminChat(m.text)}</div>
+      <div class="chat-bubble-time">${new Date(m.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+    </div>
+  `).join("") : `<p style="color:#8A5875;text-align:center;margin-top:20px">No messages yet</p>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+document.getElementById("chatReplyForm")?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const input = document.getElementById("chatReplyInput");
+  const text = input.value.trim();
+  if (!text || !selectedChatId) return;
+  input.value = "";
+  NurevaStore.Chat.sendMessage(selectedChatId, "admin", text).catch(err => alert("Could not send: " + err.message));
+});
+document.getElementById("chatBackBtn")?.addEventListener("click", () => {
+  document.querySelector(".chat-admin-layout")?.classList.remove("mobile-conv-open");
+});
+document.getElementById("chatDeleteBtn")?.addEventListener("click", () => {
+  if (!selectedChatId) return;
+  if (confirm("Delete this entire conversation? This cannot be undone.")) {
+    const idToDelete = selectedChatId;
+    NurevaStore.Chat.deleteChat(idToDelete).then(() => {
+      selectedChatId = null;
+      if (chatMessagesUnsub) { chatMessagesUnsub(); chatMessagesUnsub = null; }
+      document.getElementById("chatConvActive").style.display = "none";
+      document.getElementById("chatConvEmpty").style.display = "flex";
+      document.querySelector(".chat-admin-layout")?.classList.remove("mobile-conv-open");
+      toastAdmin("Conversation deleted");
+    }).catch(err => alert(err.message));
+  }
+});
+
+/* runs on every protected admin page: keeps the sidebar 🔔 badge live everywhere,
+   and — on admin-chat.html specifically — drives the customer list + open conversation */
+function initChatSync() {
+  NurevaStore.Chat.listenAllChats((chats) => {
+    allChats = chats;
+    updateChatBadge();
+    renderChatCustomerList();
+    if (selectedChatId) {
+      const c = allChats.find(x => x.id === selectedChatId);
+      if (c) renderConvStatus(c);
+      else {
+        selectedChatId = null;
+        if (chatMessagesUnsub) { chatMessagesUnsub(); chatMessagesUnsub = null; }
+        const active = document.getElementById("chatConvActive"); if (active) active.style.display = "none";
+        const empty = document.getElementById("chatConvEmpty"); if (empty) empty.style.display = "flex";
+      }
+    }
+  });
+  if (!chatOnlineTimer) chatOnlineTimer = setInterval(() => { renderChatCustomerList(); if (selectedChatId) { const c = allChats.find(x => x.id === selectedChatId); if (c) renderConvStatus(c); } }, 15000);
+}
 
 /* ---------- toast ---------- */
 function toastAdmin(msg) {

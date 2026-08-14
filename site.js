@@ -214,6 +214,7 @@ function initFab() {
     </a>
     <button type="button" class="fab-option" id="fabMessage" aria-label="Live Chat">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="13" rx="3.5"/><path d="M8.5 17.5v3l3.5-3"/></svg>
+      <span class="fab-badge-dot" id="fabChatDot"></span>
     </button>
     <a class="fab-option" id="fabWhatsapp" href="#" rel="noopener" aria-label="WhatsApp">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.4 5L2 22l5.2-1.4c1.4.8 3.1 1.2 4.8 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2zm5.4 14.2c-.2.6-1.3 1.2-1.8 1.3-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.5-.6-2.7-1.2-4.5-3.9-4.6-4.1-.1-.2-1.1-1.5-1.1-2.9 0-1.3.7-2 1-2.3.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .5.4.2.5.7 1.8.8 1.9.1.1.1.3 0 .4-.1.2-.1.3-.3.5-.1.2-.3.3-.4.5-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1.1 2.2 1.4 2.5 1.6.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1.2.1 1.5.7 1.7.8.2.1.4.2.4.3.1.2.1.7-.1 1.3z"/></svg>
@@ -237,7 +238,8 @@ function initFab() {
   };
   document.getElementById("fabMessage").onclick = function (e) {
     e.stopPropagation();
-    toast("Live chat is coming soon!");
+    wrap.classList.remove("open");
+    openChatPanel();
   };
 
   const callBtn = document.getElementById("fabCall");
@@ -280,6 +282,131 @@ function initFab() {
     waBtn.style.display = digits ? "" : "none";
   }
   if (window.NurevaStore) { NurevaStore.ready.then(applyFabLinks); NurevaStore.onChange(applyFabLinks); }
+}
+
+/* ---------- live chat widget (customer side) ---------- */
+let chatMsgUnsub = null, chatBadgeUnsub = null, chatHeartbeatTimer = null;
+
+function escapeChatHtml(s) { return String(s).replace(/[<>&]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c])); }
+
+function buildChatPanel() {
+  if (document.getElementById("chatPanel")) return;
+  const overlay = document.createElement("div");
+  overlay.id = "chatPanelOverlay";
+  overlay.className = "chat-panel-overlay";
+  document.body.appendChild(overlay);
+
+  const panel = document.createElement("div");
+  panel.id = "chatPanel";
+  panel.className = "chat-panel";
+  panel.innerHTML = `
+    <div class="chat-panel-head">
+      <div>
+        <div class="chat-panel-title">Live Chat</div>
+        <div class="chat-panel-sub">Nureva Fashion Support</div>
+      </div>
+      <button type="button" id="chatPanelClose" aria-label="Close">✕</button>
+    </div>
+    <div class="chat-panel-body">
+      <form id="chatStartForm" class="chat-start-form">
+        <p>Send us a message and our team will reply here shortly.</p>
+        <div class="form-group"><input type="text" id="chatNameInput" placeholder="Your Name" required></div>
+        <div class="form-group"><input type="email" id="chatEmailInput" placeholder="Your Email" required></div>
+        <button type="submit" class="btn btn-primary btn-block">Start Chat</button>
+      </form>
+      <div class="chat-thread" id="chatThread" style="display:none"></div>
+    </div>
+    <form id="chatSendForm" class="chat-send-form" style="display:none">
+      <input type="text" id="chatMsgInput" placeholder="Type a message..." autocomplete="off" required>
+      <button type="submit" aria-label="Send">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </form>`;
+  document.body.appendChild(panel);
+
+  overlay.addEventListener("click", closeChatPanel);
+  document.getElementById("chatPanelClose").addEventListener("click", closeChatPanel);
+
+  document.getElementById("chatStartForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = document.getElementById("chatNameInput").value.trim();
+    const email = document.getElementById("chatEmailInput").value.trim();
+    if (!name || !email || !window.NurevaStore) return;
+    NurevaStore.Chat.start(name, email)
+      .then(id => openConversationView(id))
+      .catch(err => toast("Could not start chat: " + err.message));
+  });
+
+  document.getElementById("chatSendForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = document.getElementById("chatMsgInput");
+    const text = input.value.trim();
+    const chatId = window.NurevaStore && NurevaStore.Chat.getMyChatId();
+    if (!text || !chatId) return;
+    input.value = "";
+    NurevaStore.Chat.sendMessage(chatId, "customer", text).catch(() => toast("Message failed to send"));
+  });
+}
+
+function showChatStartForm() {
+  document.getElementById("chatStartForm").style.display = "block";
+  document.getElementById("chatThread").style.display = "none";
+  document.getElementById("chatSendForm").style.display = "none";
+}
+
+function renderChatThread(msgs) {
+  const el = document.getElementById("chatThread");
+  if (!el) return;
+  el.innerHTML = msgs.length ? msgs.map(m => `
+    <div class="chat-bubble ${m.sender === "admin" ? "from-admin" : "from-customer"}">
+      <div class="chat-bubble-text">${escapeChatHtml(m.text)}</div>
+      <div class="chat-bubble-time">${new Date(m.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+    </div>
+  `).join("") : `<div class="chat-empty">Say hello! 👋</div>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+function openConversationView(chatId) {
+  document.getElementById("chatStartForm").style.display = "none";
+  document.getElementById("chatThread").style.display = "flex";
+  document.getElementById("chatSendForm").style.display = "flex";
+  NurevaStore.Chat.markCustomerRead(chatId);
+  const dot = document.getElementById("fabChatDot"); if (dot) dot.style.display = "none";
+  if (chatMsgUnsub) chatMsgUnsub();
+  chatMsgUnsub = NurevaStore.Chat.listenMessages(chatId, (msgs) => { renderChatThread(msgs); NurevaStore.Chat.markCustomerRead(chatId); });
+  NurevaStore.Chat.heartbeat(chatId);
+  if (chatHeartbeatTimer) clearInterval(chatHeartbeatTimer);
+  chatHeartbeatTimer = setInterval(() => NurevaStore.Chat.heartbeat(chatId), 20000);
+}
+
+function openChatPanel() {
+  buildChatPanel();
+  document.getElementById("chatPanel").classList.add("open");
+  document.getElementById("chatPanelOverlay").classList.add("open");
+  const chatId = window.NurevaStore && NurevaStore.Chat.getMyChatId();
+  if (chatId) openConversationView(chatId); else showChatStartForm();
+}
+function closeChatPanel() {
+  document.getElementById("chatPanel")?.classList.remove("open");
+  document.getElementById("chatPanelOverlay")?.classList.remove("open");
+  if (chatMsgUnsub) { chatMsgUnsub(); chatMsgUnsub = null; }
+  if (chatHeartbeatTimer) { clearInterval(chatHeartbeatTimer); chatHeartbeatTimer = null; }
+}
+
+/* keeps the little red dot on the FAB in sync even while the chat panel is closed */
+function initChatWidget() {
+  buildChatPanel();
+  if (!window.NurevaStore) return;
+  NurevaStore.ready.then(() => {
+    const chatId = NurevaStore.Chat.getMyChatId();
+    if (!chatId) return;
+    chatBadgeUnsub = NurevaStore.Chat.listenChat(chatId, (chat) => {
+      const dot = document.getElementById("fabChatDot");
+      if (!dot) return;
+      const panelOpen = document.getElementById("chatPanel")?.classList.contains("open");
+      dot.style.display = (chat && chat.customerUnread && !panelOpen) ? "block" : "none";
+    });
+  });
 }
 
 /* ---------- bottom navigation bar ---------- */
@@ -337,5 +464,5 @@ function initScrollTop() {
 
 document.addEventListener("DOMContentLoaded", () => {
   if (window.NurevaStore) { try { sessionStorage.removeItem("nurevaReloadCount"); } catch (e) {} }
-  initHeader(); initFab(); initBottomNav(); initScrollTop();
+  initHeader(); initFab(); initChatWidget(); initBottomNav(); initScrollTop();
 });
