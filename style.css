@@ -268,9 +268,9 @@ body { padding-bottom: 64px; }
 .fab-main:active { transform: scale(0.94); }
 .fab-main .fab-icon-wrap { position: absolute; top: 50%; left: 50%; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 4px; transform: translate(calc(-50% + 6px), calc(-50% - 6px)); transition: all 0.3s cubic-bezier(.34,1.56,.64,1); }
 .fab-main svg { width: 24px; height: 24px; position: relative; z-index: 1; }
-.fab-icon-close { position: absolute; top: 50%; left: 50%; z-index: 1; opacity: 0; transform: translate(calc(-50% + 6px), calc(-50% - 6px)) rotate(-45deg) scale(0.4); transition: all 0.32s cubic-bezier(.34,1.56,.64,1); }
+.fab-main svg.fab-icon-close { position: absolute; top: 50%; left: 50%; z-index: 1; opacity: 0; transform: translate(-50%, -50%) rotate(-45deg) scale(0.4); transition: all 0.32s cubic-bezier(.34,1.56,.64,1); }
 .fab-container.open .fab-icon-dots { opacity: 0; transform: translate(calc(-50% + 6px), calc(-50% - 6px)) rotate(45deg) scale(0.4); }
-.fab-container.open .fab-icon-close { opacity: 1; transform: translate(calc(-50% + 6px), calc(-50% - 6px)) rotate(0deg) scale(1); }
+.fab-container.open .fab-icon-close { opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(1); }
 .fab-dot { width: 6px; height: 6px; border-radius: 50%; background: #2E2016; animation: fabDotBounce 1.2s ease-in-out infinite; }
 .fab-dot:nth-child(1) { animation-delay: 0s; }
 .fab-dot:nth-child(2) { animation-delay: 0.15s; }
