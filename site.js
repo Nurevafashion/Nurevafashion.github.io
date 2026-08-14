@@ -4,6 +4,13 @@
 
 function formatTaka(n) { return "৳" + Number(n).toLocaleString("en-US"); }
 
+/* NurevaStore is declared with `const` at the top level of store.js.
+   Top-level const/let declarations do NOT become properties of `window`
+   (unlike var/function declarations) — so `window.NurevaStore` is always
+   undefined even though the bare name `NurevaStore` works everywhere.
+   This helper is the correct, safe way to check/access it. */
+function getNurevaStore() { return (typeof NurevaStore !== "undefined") ? NurevaStore : null; }
+
 function toast(msg) {
   let el = document.getElementById("siteToast");
   if (!el) { el = document.createElement("div"); el.id = "siteToast"; el.className = "toast"; document.body.appendChild(el); }
@@ -264,7 +271,7 @@ function initFab() {
   callBtn.addEventListener("click", function (e) {
     e.preventDefault();
     e.stopPropagation();
-    const s = (window.NurevaStore && NurevaStore.Settings.get()) || {};
+    const s = (getNurevaStore() && NurevaStore.Settings.get()) || {};
     let phone = (s.phone || "").trim();
     if (!phone) { try { phone = localStorage.getItem("nurevaLastPhone") || ""; } catch (err) {} }
     if (!phone) { toast("ফোন নম্বর এখনো যোগ করা হয়নি"); return; }
@@ -274,7 +281,7 @@ function initFab() {
   waBtn.addEventListener("click", function (e) {
     e.preventDefault();
     e.stopPropagation();
-    const s = (window.NurevaStore && NurevaStore.Settings.get()) || {};
+    const s = (getNurevaStore() && NurevaStore.Settings.get()) || {};
     let digits = (s.whatsapp || "").replace(/[^0-9]/g, "");
     if (!digits) { try { digits = (localStorage.getItem("nurevaLastWhatsapp") || "").replace(/[^0-9]/g, ""); } catch (err) {} }
     if (!digits) { toast("WhatsApp নম্বর এখনো যোগ করা হয়নি"); return; }
@@ -293,7 +300,7 @@ function initFab() {
     waBtn.href = digits ? "https://wa.me/" + digits : "#";
     waBtn.style.display = digits ? "" : "none";
   }
-  if (window.NurevaStore) { NurevaStore.ready.then(applyFabLinks); NurevaStore.onChange(applyFabLinks); }
+  if (getNurevaStore()) { NurevaStore.ready.then(applyFabLinks); NurevaStore.onChange(applyFabLinks); }
 }
 
 /* ---------- live chat widget (customer side) ---------- */
@@ -344,7 +351,7 @@ function buildChatPanel() {
     const name = document.getElementById("chatNameInput").value.trim();
     const email = document.getElementById("chatEmailInput").value.trim();
     if (!name || !email) return;
-    if (!window.NurevaStore) { toast("লোড হচ্ছে, একটু পর আবার চেষ্টা করুন"); return; }
+    if (!getNurevaStore()) { toast("লোড হচ্ছে, একটু পর আবার চেষ্টা করুন"); return; }
     const btn = document.querySelector("#chatStartForm button[type=submit]");
     if (btn) { btn.disabled = true; btn.textContent = "Starting..."; }
     NurevaStore.Chat.start(name, email)
@@ -357,7 +364,7 @@ function buildChatPanel() {
     e.preventDefault();
     const input = document.getElementById("chatMsgInput");
     const text = input.value.trim();
-    const chatId = window.NurevaStore && NurevaStore.Chat.getMyChatId();
+    const chatId = getNurevaStore() && NurevaStore.Chat.getMyChatId();
     if (!text || !chatId) return;
     input.value = "";
     NurevaStore.Chat.sendMessage(chatId, "customer", text).catch(err => toastLong("মেসেজ পাঠানো যায়নি: " + err.message));
@@ -399,7 +406,7 @@ function openChatPanel() {
   buildChatPanel();
   document.getElementById("chatPanel").classList.add("open");
   document.getElementById("chatPanelOverlay").classList.add("open");
-  const chatId = window.NurevaStore && NurevaStore.Chat.getMyChatId();
+  const chatId = getNurevaStore() && NurevaStore.Chat.getMyChatId();
   if (chatId) openConversationView(chatId); else showChatStartForm();
 }
 function closeChatPanel() {
@@ -412,7 +419,7 @@ function closeChatPanel() {
 /* keeps the little red dot on the FAB in sync even while the chat panel is closed */
 function initChatWidget() {
   buildChatPanel();
-  if (!window.NurevaStore) return;
+  if (!getNurevaStore()) return;
   NurevaStore.ready.then(() => {
     const chatId = NurevaStore.Chat.getMyChatId();
     if (!chatId) return;
@@ -479,6 +486,6 @@ function initScrollTop() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  if (window.NurevaStore) { try { sessionStorage.removeItem("nurevaReloadCount"); } catch (e) {} }
+  if (getNurevaStore()) { try { sessionStorage.removeItem("nurevaReloadCount"); } catch (e) {} }
   initHeader(); initFab(); initChatWidget(); initBottomNav(); initScrollTop();
 });
