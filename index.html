@@ -6,7 +6,7 @@
 <title>Nureva Fashion — Where Modesty Meets Elegance</title>
 <meta name="description" content="Nureva Fashion — premium Burqa, Three-Piece, Hijab and Panjabi collections online. Cash on delivery nationwide.">
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=23">
+<link rel="stylesheet" href="style.css?v=26">
 </head>
 <body>
 
@@ -51,6 +51,7 @@
   <a href="products.html?cat=Hijab">Hijab</a>
   <a href="products.html?cat=Panjabi">Panjabi</a>
   <a href="products.html?cat=Nureva%20Signature">Nureva Signature</a>
+  <a href="products.html?cat=Nureva%20Classic">Nureva Classic</a>
   <a href="track-order.html">My Orders</a>
       <a href="contact.html">Contact</a>
   <a data-fb-link href="#" target="_blank" rel="noopener">Facebook Page</a>
@@ -88,6 +89,18 @@
   </div>
 </section>
 
+<div class="container"><div class="stitch"></div></div>
+
+<section id="popularPicksSection">
+  <div class="container">
+    <div class="section-head">
+      <h2>Popular Picks</h2>
+      <p>Customer favourites, hand-picked for you</p>
+    </div>
+    <div class="product-grid" id="popularPicksGrid"></div>
+  </div>
+</section>
+
 <div class="topbar">Cash on Delivery Nationwide &nbsp;•&nbsp; Order via Facebook or our website</div>
 
 <footer id="siteFooter"></footer>
@@ -95,9 +108,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="firebase-config.js?v=23"></script>
-<script src="store.js?v=23"></script>
-<script src="site.js?v=23"></script>
+<script src="firebase-config.js?v=26"></script>
+<script src="store.js?v=26"></script>
+<script src="site.js?v=26"></script>
 <script>
   function renderHome() {
     applySettings();
@@ -105,11 +118,12 @@
     renderCovers();
 
     const catImages = {};
-    NurevaStore.CATEGORIES.forEach(c => {
+    const shopByCatList = NurevaStore.CATEGORIES.filter(c => c !== "Offers");
+    shopByCatList.forEach(c => {
       const p = NurevaStore.Products.byCategory(c)[0];
       catImages[c] = p ? p.images[0] : NurevaStore.placeholderImage(c);
     });
-    document.getElementById("catGrid").innerHTML = NurevaStore.CATEGORIES.map(c => `
+    document.getElementById("catGrid").innerHTML = shopByCatList.map(c => `
       <a class="cat-card" href="products.html?cat=${encodeURIComponent(c)}">
         <img src="${catImages[c]}" alt="${c}">
         <div class="label">${c}</div>
@@ -118,6 +132,9 @@
 
     const newArrivals = NurevaStore.Products.newArrivals().slice(0, 4);
     renderProductGrid("newArrivalsGrid", newArrivals, "New products will appear here soon.");
+
+    const popularPicks = NurevaStore.Products.featured().slice(0, 4);
+    renderProductGrid("popularPicksGrid", popularPicks, "Popular picks will appear here soon.");
 
     renderFooter(true);
   }

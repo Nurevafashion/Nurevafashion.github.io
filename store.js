@@ -9,7 +9,7 @@
    ============================================================ */
 
 const NurevaStore = (() => {
-  const CATEGORIES = ["Burqa", "Three-Piece", "Hijab", "Panjabi", "Nureva Signature"];
+  const CATEGORIES = ["Burqa", "Three-Piece", "Hijab", "Panjabi", "Nureva Signature", "Nureva Classic", "Offers"];
 
   /* ---------- placeholder image (SVG) ---------- */
   function hashCode(str) { let h = 0; for (let i = 0; i < String(str).length; i++) { h = (h << 5) - h + str.charCodeAt(i); h |= 0; } return h; }
@@ -104,7 +104,7 @@ const NurevaStore = (() => {
     byCategory: (cat) => cache.products.filter(p => p.category === cat),
     featured: () => cache.products.filter(p => p.isFeatured),
     newArrivals: () => cache.products.filter(p => p.isNew),
-    onOffer: () => cache.products.filter(p => p.offerPrice),
+    onOffer: () => cache.products.filter(p => p.offerPrice || p.category === "Offers"),
     search: (q) => {
       q = (q || "").trim().toLowerCase();
       if (!q) return [];
@@ -197,7 +197,7 @@ const NurevaStore = (() => {
     let id = 1;
     const batch = db.batch();
     CATEGORIES.forEach(cat => {
-      names[cat].forEach((n, idx) => {
+      (names[cat] || []).forEach((n, idx) => {
         const price = 1200 + (id % 5) * 400;
         const hasOffer = id % 3 === 0;
         const ref = db.collection("products").doc();

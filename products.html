@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>All Products — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=23">
+<link rel="stylesheet" href="style.css?v=26">
 </head>
 <body>
 
@@ -50,6 +50,7 @@
   <a href="products.html?cat=Hijab">Hijab</a>
   <a href="products.html?cat=Panjabi">Panjabi</a>
   <a href="products.html?cat=Nureva%20Signature">Nureva Signature</a>
+  <a href="products.html?cat=Nureva%20Classic">Nureva Classic</a>
   <a href="track-order.html">My Orders</a>
       <a href="contact.html">Contact</a>
   <a data-fb-link href="#" target="_blank" rel="noopener">Facebook Page</a>
@@ -76,9 +77,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="firebase-config.js?v=23"></script>
-<script src="store.js?v=23"></script>
-<script src="site.js?v=23"></script>
+<script src="firebase-config.js?v=26"></script>
+<script src="store.js?v=26"></script>
+<script src="site.js?v=26"></script>
 <script>
   function renderProductsPage() {
     applySettings();
@@ -86,7 +87,7 @@
     const catParam = params.get("cat");
     const filterParam = params.get("filter");
 
-    const chips = [{ label: "All", value: "" }, ...NurevaStore.CATEGORIES.map(c => ({ label: c, value: c }))];
+    const chips = [{ label: "All", value: "" }, ...NurevaStore.CATEGORIES.filter(c => c !== "Offers").map(c => ({ label: c, value: c }))];
     document.getElementById("filterBar").innerHTML = chips.map(c => `
       <a class="filter-chip ${catParam === c.value && c.value !== "" ? "active" : (!catParam && c.value === "" && !filterParam ? "active" : "")}"
          href="${c.value ? "products.html?cat=" + encodeURIComponent(c.value) : "products.html"}">${c.label}</a>
