@@ -90,7 +90,19 @@ const NurevaStore = (() => {
   );
   db.collection("settings").doc("general").onSnapshot(
     doc => { cache.settings = doc.exists ? { ...defaultSettings(), ...doc.data() } : defaultSettings(); flags.settings = true; checkReady(); notify(); },
-    err => { console.error("settings sync error:", err); flags.settings = true; checkReady(); }
+    err => {
+      console.error("settings sync error:", err);
+      flags.settings = true; checkReady();
+      /* TEMP DEBUG: surface this on-screen so we can see the real
+         Firestore error (e.g. permission-denied) instead of it only
+         going to a console nobody's watching. Remove once diagnosed. */
+      if (document.body) {
+        const d = document.createElement("div");
+        d.textContent = "SETTINGS SYNC ERROR: " + (err && err.code) + " — " + (err && err.message);
+        d.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:99999;background:#c0392b;color:#fff;padding:10px;font-size:13px;text-align:center;";
+        document.body.prepend(d);
+      }
+    }
   );
   db.collection("orders").orderBy("date", "desc").onSnapshot(
     snap => { cache.orders = snap.docs.map(d => ({ id: d.id, ...d.data() })); notify(); },
