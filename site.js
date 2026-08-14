@@ -13,6 +13,18 @@ function toast(msg) {
   el._t = setTimeout(() => el.classList.remove("show"), 2200);
 }
 
+/* Same as toast(), but stays on screen much longer — used for real error
+   messages (e.g. a Firestore permission error) that the shop owner may
+   need time to read and screenshot, rather than a quick confirmation. */
+function toastLong(msg) {
+  let el = document.getElementById("siteToast");
+  if (!el) { el = document.createElement("div"); el.id = "siteToast"; el.className = "toast"; document.body.appendChild(el); }
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove("show"), 8000);
+}
+
 /* ---------- header: mobile drawer + search ---------- */
 function initHeader() {
   const menuToggle = document.getElementById("menuToggle");
@@ -331,10 +343,14 @@ function buildChatPanel() {
     e.preventDefault();
     const name = document.getElementById("chatNameInput").value.trim();
     const email = document.getElementById("chatEmailInput").value.trim();
-    if (!name || !email || !window.NurevaStore) return;
+    if (!name || !email) return;
+    if (!window.NurevaStore) { toast("লোড হচ্ছে, একটু পর আবার চেষ্টা করুন"); return; }
+    const btn = document.querySelector("#chatStartForm button[type=submit]");
+    if (btn) { btn.disabled = true; btn.textContent = "Starting..."; }
     NurevaStore.Chat.start(name, email)
       .then(id => openConversationView(id))
-      .catch(err => toast("Could not start chat: " + err.message));
+      .catch(err => { toastLong("চ্যাট শুরু করা যায়নি: " + err.message); })
+      .finally(() => { if (btn) { btn.disabled = false; btn.textContent = "Start Chat"; } });
   });
 
   document.getElementById("chatSendForm").addEventListener("submit", (e) => {
@@ -344,7 +360,7 @@ function buildChatPanel() {
     const chatId = window.NurevaStore && NurevaStore.Chat.getMyChatId();
     if (!text || !chatId) return;
     input.value = "";
-    NurevaStore.Chat.sendMessage(chatId, "customer", text).catch(() => toast("Message failed to send"));
+    NurevaStore.Chat.sendMessage(chatId, "customer", text).catch(err => toastLong("মেসেজ পাঠানো যায়নি: " + err.message));
   });
 }
 
