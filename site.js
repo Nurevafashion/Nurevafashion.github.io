@@ -252,9 +252,7 @@ function initFab() {
     e.stopPropagation();
     const s = (window.NurevaStore && NurevaStore.Settings.get()) || {};
     const phone = (s.phone || "").trim();
-    /* TEMP DEBUG: shows exactly what the site is reading, so we can see
-       whether Firestore data reached the browser. Remove once fixed. */
-    if (!phone) { toast("DEBUG phone=[" + (s.phone === undefined ? "undefined" : JSON.stringify(s.phone)) + "]"); return; }
+    if (!phone) { toast("ফোন নম্বর এখনো যোগ করা হয়নি"); return; }
     window.location.href = "tel:" + phone;
   });
 
@@ -263,9 +261,7 @@ function initFab() {
     e.stopPropagation();
     const s = (window.NurevaStore && NurevaStore.Settings.get()) || {};
     const digits = (s.whatsapp || "").replace(/[^0-9]/g, "");
-    /* TEMP DEBUG: shows exactly what the site is reading, so we can see
-       whether Firestore data reached the browser. Remove once fixed. */
-    if (!digits) { toast("DEBUG whatsapp=[" + (s.whatsapp === undefined ? "undefined" : JSON.stringify(s.whatsapp)) + "]"); return; }
+    if (!digits) { toast("WhatsApp নম্বর এখনো যোগ করা হয়নি"); return; }
     window.open("https://wa.me/" + digits, "_blank", "noopener");
   });
 

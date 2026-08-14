@@ -334,6 +334,14 @@ function renderOrders() {
 
 /* ---------- Settings ---------- */
 function renderSettings() {
+  /* Guard: if the admin is actively typing in this form, a background
+     Firestore update on ANY collection (products/orders/etc.) used to
+     re-run this function and silently overwrite whatever they'd just
+     typed with the last-saved (often empty) value — so Phone/WhatsApp
+     looked "saved" but the blank value that got submitted was really
+     the just-clobbered one. Skip the refresh while the form has focus. */
+  const formEl = document.getElementById("settingsForm");
+  if (formEl && formEl.contains(document.activeElement)) return;
   const s = NurevaStore.Settings.get();
   document.getElementById("setSiteName").value = s.siteName || "";
   document.getElementById("setTagline").value = s.tagline || "";
