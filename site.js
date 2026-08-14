@@ -250,19 +250,38 @@ function initFab() {
   callBtn.addEventListener("click", function (e) {
     e.preventDefault();
     e.stopPropagation();
-    const s = (window.NurevaStore && NurevaStore.Settings.get()) || {};
-    const phone = (s.phone || "").trim();
-    if (!phone) { toast("ফোন নম্বর এখনো যোগ করা হয়নি"); return; }
-    window.location.href = "tel:" + phone;
+    const go = () => {
+      const s = (window.NurevaStore && NurevaStore.Settings.get()) || {};
+      const phone = (s.phone || "").trim();
+      if (!phone) { toast("ফোন নম্বর এখনো যোগ করা হয়নি"); return; }
+      window.location.href = "tel:" + phone;
+    };
+    /* If Firestore hasn't finished its first sync yet (e.g. the FAB was
+       tapped right after page load, before the network round-trip
+       completed), wait for it instead of instantly reporting "missing". */
+    if (window.NurevaStore && !NurevaStore.isReady()) {
+      toast("লোড হচ্ছে...");
+      NurevaStore.ready.then(go);
+    } else {
+      go();
+    }
   });
 
   waBtn.addEventListener("click", function (e) {
     e.preventDefault();
     e.stopPropagation();
-    const s = (window.NurevaStore && NurevaStore.Settings.get()) || {};
-    const digits = (s.whatsapp || "").replace(/[^0-9]/g, "");
-    if (!digits) { toast("WhatsApp নম্বর এখনো যোগ করা হয়নি"); return; }
-    window.open("https://wa.me/" + digits, "_blank", "noopener");
+    const go = () => {
+      const s = (window.NurevaStore && NurevaStore.Settings.get()) || {};
+      const digits = (s.whatsapp || "").replace(/[^0-9]/g, "");
+      if (!digits) { toast("WhatsApp নম্বর এখনো যোগ করা হয়নি"); return; }
+      window.open("https://wa.me/" + digits, "_blank", "noopener");
+    };
+    if (window.NurevaStore && !NurevaStore.isReady()) {
+      toast("লোড হচ্ছে...");
+      NurevaStore.ready.then(go);
+    } else {
+      go();
+    }
   });
 
   function applyFabLinks() {

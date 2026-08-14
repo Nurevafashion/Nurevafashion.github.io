@@ -369,22 +369,7 @@ document.getElementById("settingsForm")?.addEventListener("submit", (e) => {
     deliveryOutsideDhaka: Number(document.getElementById("setDeliveryOut").value) || 0,
   };
   NurevaStore.Settings.update(payload)
-    .then(() => {
-      /* Verify by reading straight back from Firestore, bypassing the
-         local cache entirely, so we can see exactly what actually got
-         written — not just that the write call succeeded. */
-      return db.collection("settings").doc("general").get({ source: "server" });
-    })
-    .then(doc => {
-      const d = doc.data() || {};
-      toastAdmin("Settings saved");
-      alert(
-        "যাচাই (Firestore থেকে সরাসরি পড়া হলো):\n\n" +
-        "phone = \"" + (d.phone || "") + "\"\n" +
-        "whatsapp = \"" + (d.whatsapp || "") + "\"\n" +
-        "deliveryInsideDhaka = " + d.deliveryInsideDhaka
-      );
-    })
+    .then(() => toastAdmin("Settings saved"))
     .catch(err => alert("Settings could not be saved: " + err.message));
 });
 document.getElementById("passwordForm")?.addEventListener("submit", (e) => {
