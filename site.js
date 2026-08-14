@@ -251,7 +251,8 @@ function initFab() {
     e.preventDefault();
     e.stopPropagation();
     const s = (window.NurevaStore && NurevaStore.Settings.get()) || {};
-    const phone = (s.phone || "").trim();
+    let phone = (s.phone || "").trim();
+    if (!phone) { try { phone = localStorage.getItem("nurevaLastPhone") || ""; } catch (err) {} }
     if (!phone) { toast("ফোন নম্বর এখনো যোগ করা হয়নি"); return; }
     window.location.href = "tel:" + phone;
   });
@@ -260,7 +261,8 @@ function initFab() {
     e.preventDefault();
     e.stopPropagation();
     const s = (window.NurevaStore && NurevaStore.Settings.get()) || {};
-    const digits = (s.whatsapp || "").replace(/[^0-9]/g, "");
+    let digits = (s.whatsapp || "").replace(/[^0-9]/g, "");
+    if (!digits) { try { digits = (localStorage.getItem("nurevaLastWhatsapp") || "").replace(/[^0-9]/g, ""); } catch (err) {} }
     if (!digits) { toast("WhatsApp নম্বর এখনো যোগ করা হয়নি"); return; }
     window.open("https://wa.me/" + digits, "_blank", "noopener");
   });

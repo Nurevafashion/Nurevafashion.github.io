@@ -89,7 +89,19 @@ const NurevaStore = (() => {
     err => { console.error("news sync error:", err); flags.news = true; checkReady(); }
   );
   db.collection("settings").doc("general").onSnapshot(
-    doc => { cache.settings = doc.exists ? { ...defaultSettings(), ...doc.data() } : defaultSettings(); flags.settings = true; checkReady(); notify(); },
+    doc => {
+      cache.settings = doc.exists ? { ...defaultSettings(), ...doc.data() } : defaultSettings();
+      flags.settings = true; checkReady(); notify();
+      /* Durable fallback: cache the last successfully-synced contact
+         numbers in localStorage. If a future page load's live Firestore
+         sync is delayed/fails (flaky mobile network), the Call/WhatsApp
+         buttons can still fall back to the last known-good numbers
+         instead of wrongly reporting "not added". */
+      try {
+        if (cache.settings.phone) localStorage.setItem("nurevaLastPhone", cache.settings.phone);
+        if (cache.settings.whatsapp) localStorage.setItem("nurevaLastWhatsapp", cache.settings.whatsapp);
+      } catch (e) {}
+    },
     err => { console.error("settings sync error:", err); flags.settings = true; checkReady(); }
   );
   db.collection("orders").orderBy("date", "desc").onSnapshot(
