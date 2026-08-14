@@ -356,7 +356,7 @@ function renderSettings() {
 }
 document.getElementById("settingsForm")?.addEventListener("submit", (e) => {
   e.preventDefault();
-  NurevaStore.Settings.update({
+  const payload = {
     siteName: document.getElementById("setSiteName").value.trim(),
     tagline: document.getElementById("setTagline").value.trim(),
     facebook: document.getElementById("setFacebook").value.trim(),
@@ -367,7 +367,24 @@ document.getElementById("settingsForm")?.addEventListener("submit", (e) => {
     address: document.getElementById("setAddress").value.trim(),
     deliveryInsideDhaka: Number(document.getElementById("setDeliveryIn").value) || 0,
     deliveryOutsideDhaka: Number(document.getElementById("setDeliveryOut").value) || 0,
-  }).then(() => toastAdmin("Settings saved"))
+  };
+  NurevaStore.Settings.update(payload)
+    .then(() => {
+      /* Verify by reading straight back from Firestore, bypassing the
+         local cache entirely, so we can see exactly what actually got
+         written — not just that the write call succeeded. */
+      return db.collection("settings").doc("general").get({ source: "server" });
+    })
+    .then(doc => {
+      const d = doc.data() || {};
+      toastAdmin("Settings saved");
+      alert(
+        "যাচাই (Firestore থেকে সরাসরি পড়া হলো):\n\n" +
+        "phone = \"" + (d.phone || "") + "\"\n" +
+        "whatsapp = \"" + (d.whatsapp || "") + "\"\n" +
+        "deliveryInsideDhaka = " + d.deliveryInsideDhaka
+      );
+    })
     .catch(err => alert("Settings could not be saved: " + err.message));
 });
 document.getElementById("passwordForm")?.addEventListener("submit", (e) => {
