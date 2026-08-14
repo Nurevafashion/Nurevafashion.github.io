@@ -251,8 +251,6 @@ function initFab() {
     e.preventDefault();
     e.stopPropagation();
     const s = (window.NurevaStore && NurevaStore.Settings.get()) || {};
-    const ready = window.NurevaStore ? NurevaStore.isReady() : "no NurevaStore";
-    alert("DEBUG (Call বাটন)\n\nready=" + ready + "\nphone=\"" + s.phone + "\"\nsiteName=\"" + s.siteName + "\"");
     const phone = (s.phone || "").trim();
     if (!phone) { toast("ফোন নম্বর এখনো যোগ করা হয়নি"); return; }
     window.location.href = "tel:" + phone;
@@ -262,8 +260,6 @@ function initFab() {
     e.preventDefault();
     e.stopPropagation();
     const s = (window.NurevaStore && NurevaStore.Settings.get()) || {};
-    const ready = window.NurevaStore ? NurevaStore.isReady() : "no NurevaStore";
-    alert("DEBUG (WhatsApp বাটন)\n\nready=" + ready + "\nwhatsapp=\"" + s.whatsapp + "\"\nsiteName=\"" + s.siteName + "\"");
     const digits = (s.whatsapp || "").replace(/[^0-9]/g, "");
     if (!digits) { toast("WhatsApp নম্বর এখনো যোগ করা হয়নি"); return; }
     window.open("https://wa.me/" + digits, "_blank", "noopener");
@@ -337,4 +333,7 @@ function initScrollTop() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => { initHeader(); initFab(); initBottomNav(); initScrollTop(); });
+document.addEventListener("DOMContentLoaded", () => {
+  if (window.NurevaStore) { try { sessionStorage.removeItem("nurevaReloadCount"); } catch (e) {} }
+  initHeader(); initFab(); initBottomNav(); initScrollTop();
+});

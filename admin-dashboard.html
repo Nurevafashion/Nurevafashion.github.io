@@ -6,8 +6,8 @@
 <title>Dashboard — Nureva Fashion Admin</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=33">
-<link rel="stylesheet" href="admin.css?v=33">
+<link rel="stylesheet" href="style.css?v=34">
+<link rel="stylesheet" href="admin.css?v=34">
 </head>
 <body class="admin-body">
 
@@ -41,11 +41,23 @@
   </main>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="firebase-config.js?v=33"></script>
-<script src="store.js?v=33"></script>
-<script src="admin.js?v=33"></script>
+<script>
+  /* Self-healing: mobile networks sometimes drop one of these CDN/script
+     requests mid-load. If that happens NurevaStore never gets created and
+     everything relying on it (Call/WhatsApp, products, etc.) silently
+     fails. Auto-reload once (only once, via sessionStorage guard) so a
+     transient network blip fixes itself instead of leaving a broken page. */
+  function nurevaRetryLoad() {
+    var key = "nurevaReloadCount";
+    var n = parseInt(sessionStorage.getItem(key) || "0", 10);
+    if (n < 2) { sessionStorage.setItem(key, String(n + 1)); location.reload(); }
+  }
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js" onerror="nurevaRetryLoad()"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js" onerror="nurevaRetryLoad()"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js" onerror="nurevaRetryLoad()"></script>
+<script src="firebase-config.js?v=34" onerror="nurevaRetryLoad()"></script>
+<script src="store.js?v=34" onerror="nurevaRetryLoad()"></script>
+<script src="admin.js?v=34"></script>
 </body>
 </html>
