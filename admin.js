@@ -349,17 +349,18 @@ function renderSettings() {
 document.getElementById("settingsForm")?.addEventListener("submit", (e) => {
   e.preventDefault();
   NurevaStore.Settings.update({
-    siteName: document.getElementById("setSiteName").value,
-    tagline: document.getElementById("setTagline").value,
-    facebook: document.getElementById("setFacebook").value,
-    instagram: document.getElementById("setInstagram").value,
-    messenger: document.getElementById("setMessenger").value,
-    phone: document.getElementById("setPhone").value,
-    whatsapp: document.getElementById("setWhatsapp").value,
-    address: document.getElementById("setAddress").value,
+    siteName: document.getElementById("setSiteName").value.trim(),
+    tagline: document.getElementById("setTagline").value.trim(),
+    facebook: document.getElementById("setFacebook").value.trim(),
+    instagram: document.getElementById("setInstagram").value.trim(),
+    messenger: document.getElementById("setMessenger").value.trim(),
+    phone: document.getElementById("setPhone").value.trim(),
+    whatsapp: document.getElementById("setWhatsapp").value.replace(/[^0-9]/g, ""),
+    address: document.getElementById("setAddress").value.trim(),
     deliveryInsideDhaka: Number(document.getElementById("setDeliveryIn").value) || 0,
     deliveryOutsideDhaka: Number(document.getElementById("setDeliveryOut").value) || 0,
-  }).then(() => toastAdmin("Settings saved"));
+  }).then(() => toastAdmin("Settings saved"))
+    .catch(err => alert("Settings could not be saved: " + err.message));
 });
 document.getElementById("passwordForm")?.addEventListener("submit", (e) => {
   e.preventDefault();

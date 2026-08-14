@@ -215,7 +215,7 @@ function initFab() {
     <button type="button" class="fab-option" id="fabMessage" aria-label="Live Chat">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="13" rx="3.5"/><path d="M8.5 17.5v3l3.5-3"/></svg>
     </button>
-    <a class="fab-option" id="fabWhatsapp" href="#" target="_blank" rel="noopener" aria-label="WhatsApp">
+    <a class="fab-option" id="fabWhatsapp" href="#" rel="noopener" aria-label="WhatsApp">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.4 5L2 22l5.2-1.4c1.4.8 3.1 1.2 4.8 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2zm5.4 14.2c-.2.6-1.3 1.2-1.8 1.3-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.5-.6-2.7-1.2-4.5-3.9-4.6-4.1-.1-.2-1.1-1.5-1.1-2.9 0-1.3.7-2 1-2.3.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .5.4.2.5.7 1.8.8 1.9.1.1.1.3 0 .4-.1.2-.1.3-.3.5-.1.2-.3.3-.4.5-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1.1 2.2 1.4 2.5 1.6.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1.2.1 1.5.7 1.7.8.2.1.4.2.4.3.1.2.1.7-.1 1.3z"/></svg>
     </a>
     <a class="fab-option" id="fabCall" href="#" aria-label="Call">
@@ -240,14 +240,42 @@ function initFab() {
     toast("Live chat is coming soon!");
   };
 
+  const callBtn = document.getElementById("fabCall");
+  const waBtn = document.getElementById("fabWhatsapp");
+
+  /* Read settings fresh at the moment of the tap (rather than trusting a
+     pre-computed href) so a slow/late Firestore sync can never leave the
+     button pointing at the placeholder "#", which is what made Call look
+     like it was just scrolling the page to the top. */
+  callBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const s = (window.NurevaStore && NurevaStore.Settings.get()) || {};
+    const phone = (s.phone || "").trim();
+    if (!phone) { toast("ফোন নম্বর এখনো যোগ করা হয়নি"); return; }
+    window.location.href = "tel:" + phone;
+  });
+
+  waBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const s = (window.NurevaStore && NurevaStore.Settings.get()) || {};
+    const digits = (s.whatsapp || "").replace(/[^0-9]/g, "");
+    if (!digits) { toast("WhatsApp নম্বর এখনো যোগ করা হয়নি"); return; }
+    window.open("https://wa.me/" + digits, "_blank", "noopener");
+  });
+
   function applyFabLinks() {
     const s = NurevaStore.Settings.get();
-    const callBtn = document.getElementById("fabCall");
-    const waBtn = document.getElementById("fabWhatsapp");
-    if (s.phone) { callBtn.href = "tel:" + s.phone; callBtn.style.display = ""; }
-    else { callBtn.style.display = "none"; }
-    if (s.whatsapp) { waBtn.href = `https://wa.me/${s.whatsapp}`; waBtn.style.display = ""; }
-    else { waBtn.style.display = "none"; }
+    const phone = (s.phone || "").trim();
+    const digits = (s.whatsapp || "").replace(/[^0-9]/g, "");
+    /* href kept in sync too (for long-press "copy link", accessibility,
+       and as a fallback) — the click handlers above remain the source
+       of truth for the actual tap. */
+    callBtn.href = phone ? "tel:" + phone : "#";
+    callBtn.style.display = phone ? "" : "none";
+    waBtn.href = digits ? "https://wa.me/" + digits : "#";
+    waBtn.style.display = digits ? "" : "none";
   }
   if (window.NurevaStore) { NurevaStore.ready.then(applyFabLinks); NurevaStore.onChange(applyFabLinks); }
 }
