@@ -4,6 +4,28 @@
 
 function formatTaka(n) { return "৳" + Number(n).toLocaleString("en-US"); }
 
+/* Shared Bangladesh district list, grouped by division — used by the
+   checkout page and the Account page's Location Edit form so both stay
+   in sync from one place. */
+const BD_DISTRICTS = {
+  "Dhaka Division": ["Dhaka", "Faridpur", "Gazipur", "Gopalganj", "Kishoreganj", "Madaripur", "Manikganj", "Munshiganj", "Narayanganj", "Narsingdi", "Rajbari", "Shariatpur", "Tangail"],
+  "Chattogram Division": ["Bandarban", "Brahmanbaria", "Chandpur", "Chattogram", "Cumilla", "Cox's Bazar", "Feni", "Khagrachari", "Lakshmipur", "Noakhali", "Rangamati"],
+  "Rajshahi Division": ["Bogura", "Chapainawabganj", "Joypurhat", "Naogaon", "Natore", "Pabna", "Rajshahi", "Sirajganj"],
+  "Khulna Division": ["Bagerhat", "Chuadanga", "Jashore", "Jhenaidah", "Khulna", "Kushtia", "Magura", "Meherpur", "Narail", "Satkhira"],
+  "Barishal Division": ["Barguna", "Barishal", "Bhola", "Jhalokati", "Patuakhali", "Pirojpur"],
+  "Sylhet Division": ["Habiganj", "Moulvibazar", "Sunamganj", "Sylhet"],
+  "Rangpur Division": ["Dinajpur", "Gaibandha", "Kurigram", "Lalmonirhat", "Nilphamari", "Panchagarh", "Rangpur", "Thakurgaon"],
+  "Mymensingh Division": ["Jamalpur", "Mymensingh", "Netrokona", "Sherpur"],
+};
+function populateDistrictSelect(selectEl) {
+  if (!selectEl) return;
+  let html = `<option value="" disabled selected>Select District</option>`;
+  Object.entries(BD_DISTRICTS).forEach(([division, districts]) => {
+    html += `<optgroup label="${division}">` + districts.map(d => `<option>${d}</option>`).join("") + `</optgroup>`;
+  });
+  selectEl.innerHTML = html;
+}
+
 /* NurevaStore is declared with `const` at the top level of store.js.
    Top-level const/let declarations do NOT become properties of `window`
    (unlike var/function declarations) — so `window.NurevaStore` is always

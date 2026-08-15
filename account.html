@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Account — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=41">
+<link rel="stylesheet" href="style.css?v=44">
 <style>
   .account-wrap { max-width: 460px; margin: 0 auto; padding: 30px 20px 60px; }
   .auth-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
@@ -23,6 +23,11 @@
   .account-link .txt strong { display: block; font-size: 0.95rem; }
   .account-link .txt span { color: var(--mauve); font-size: 0.8rem; }
   .order-mini { background: var(--white); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); margin-bottom: 10px; font-size: 0.88rem; }
+  .profile-actions-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .btn-mini { flex: 1; min-width: 90px; border: 1.5px solid rgba(59,31,50,0.25); background: var(--white); color: var(--primary); font-size: 0.78rem; font-weight: 600; padding: 8px 6px; border-radius: var(--radius); text-align: center; white-space: nowrap; }
+  .btn-mini:active { background: rgba(59,31,50,0.06); }
+  .btn-mini-danger { border-color: rgba(162,59,59,0.35); color: var(--danger); }
+  .btn-mini-danger:active { background: rgba(162,59,59,0.06); }
 </style>
 </head>
 <body>
@@ -124,15 +129,37 @@
   <!-- Signed-in view -->
   <div id="loggedInView" style="display:none">
     <div class="profile-card">
+      <div class="profile-actions-row">
+        <button class="btn-mini" id="openProfileEditBtn">✏️ Profile Edit</button>
+        <button class="btn-mini" id="editAddressBtn">📍 Location Edit</button>
+        <button class="btn-mini" id="openPasswordEditBtn">🔑 Change Password</button>
+        <button class="btn-mini btn-mini-danger" id="logoutBtn">🚪 Log Out</button>
+      </div>
+
       <h3 id="profName">—</h3>
       <p id="profPhone"></p>
       <p id="profEmail"></p>
       <p id="profAddress" style="margin-top:6px"></p>
 
-      <div id="addressView">
-        <button class="btn btn-outline" id="editAddressBtn" style="margin-top:10px">Add / Edit Location</button>
+      <!-- Profile edit (name / phone / email) -->
+      <div id="profileEdit" style="display:none; margin-top:14px">
+        <div class="form-group"><label>Full Name</label><input type="text" id="peName"></div>
+        <div class="form-group"><label>Mobile Number</label><input type="tel" id="pePhone" placeholder="01XXXXXXXXX"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="peEmail"></div>
+        <div class="form-group" id="pePasswordGroup" style="display:none">
+          <label>Current Password <span style="font-weight:400;color:var(--mauve)">(needed to change email)</span></label>
+          <input type="password" id="pePassword" placeholder="Enter your current password">
+        </div>
+        <p class="auth-error" id="profileEditError"></p>
+        <div style="display:flex; gap:10px">
+          <button class="btn btn-primary" id="saveProfileBtn">Save</button>
+          <button class="btn btn-outline" id="cancelProfileBtn">Cancel</button>
+        </div>
       </div>
-      <div id="addressEdit" style="display:none; margin-top:10px">
+
+      <!-- Location edit -->
+      <div id="addressEdit" style="display:none; margin-top:14px">
+        <div class="form-group"><label>District</label><select id="districtInput"></select></div>
         <div class="form-group"><label>Delivery Address / Location</label><textarea id="addressInput" placeholder="House, road, area, district..."></textarea></div>
         <div style="display:flex; gap:10px">
           <button class="btn btn-primary" id="saveAddressBtn">Save</button>
@@ -140,7 +167,17 @@
         </div>
       </div>
 
-      <button class="btn btn-outline" id="logoutBtn" style="margin-top:14px">Log Out</button>
+      <!-- Password change -->
+      <div id="passwordEdit" style="display:none; margin-top:14px">
+        <div class="form-group"><label>Current Password</label><input type="password" id="pwCurrent" placeholder="Enter your current password"></div>
+        <div class="form-group"><label>New Password</label><input type="password" id="pwNew" placeholder="At least 6 characters" minlength="6"></div>
+        <div class="form-group"><label>Confirm New Password</label><input type="password" id="pwConfirm" placeholder="Re-type new password"></div>
+        <p class="auth-error" id="passwordEditError"></p>
+        <div style="display:flex; gap:10px">
+          <button class="btn btn-primary" id="savePasswordBtn">Save</button>
+          <button class="btn btn-outline" id="cancelPasswordBtn">Cancel</button>
+        </div>
+      </div>
     </div>
 
     <a href="track-order.html" class="account-link">
@@ -178,9 +215,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js" onerror="nurevaRetryLoad()"></script>
-<script src="firebase-config.js?v=41" onerror="nurevaRetryLoad()"></script>
-<script src="store.js?v=41" onerror="nurevaRetryLoad()"></script>
-<script src="site.js?v=41"></script>
+<script src="firebase-config.js?v=44" onerror="nurevaRetryLoad()"></script>
+<script src="store.js?v=44" onerror="nurevaRetryLoad()"></script>
+<script src="site.js?v=44"></script>
 <script>
   NurevaStore.ready.then(() => { applySettings(); renderFooter(); });
 
@@ -254,25 +291,136 @@
 
   document.getElementById("logoutBtn").addEventListener("click", () => NurevaStore.Customer.logout());
 
-  // Add / edit location on the profile
+  populateDistrictSelect(document.getElementById("districtInput"));
+
+  function closeAllEditPanels() {
+    document.getElementById("profileEdit").style.display = "none";
+    document.getElementById("addressEdit").style.display = "none";
+    document.getElementById("passwordEdit").style.display = "none";
+  }
+
+  // ---- Location Edit ----
   document.getElementById("editAddressBtn").addEventListener("click", () => {
+    const isOpen = document.getElementById("addressEdit").style.display === "block";
+    closeAllEditPanels();
+    if (isOpen) return; // toggle off
     document.getElementById("addressInput").value = document.getElementById("profAddress").dataset.raw || "";
-    document.getElementById("addressView").style.display = "none";
+    document.getElementById("districtInput").value = document.getElementById("profAddress").dataset.district || "";
     document.getElementById("addressEdit").style.display = "block";
   });
-  document.getElementById("cancelAddressBtn").addEventListener("click", () => {
-    document.getElementById("addressEdit").style.display = "none";
-    document.getElementById("addressView").style.display = "block";
-  });
+  document.getElementById("cancelAddressBtn").addEventListener("click", closeAllEditPanels);
   document.getElementById("saveAddressBtn").addEventListener("click", () => {
     const val = document.getElementById("addressInput").value.trim();
-    NurevaStore.Customer.updateProfile({ address: val }).then(() => {
-      document.getElementById("profAddress").textContent = val ? ("📍 " + val) : "";
+    const district = document.getElementById("districtInput").value;
+    NurevaStore.Customer.updateProfile({ address: val, district }).then(() => {
+      const label = [district, val].filter(Boolean).join(" — ");
+      document.getElementById("profAddress").textContent = label ? ("📍 " + label) : "";
       document.getElementById("profAddress").dataset.raw = val;
-      document.getElementById("addressEdit").style.display = "none";
-      document.getElementById("addressView").style.display = "block";
+      document.getElementById("profAddress").dataset.district = district;
+      closeAllEditPanels();
       toast("Location saved!");
     }).catch(() => toast("Could not save location. Please try again."));
+  });
+
+  // ---- Change Password ----
+  document.getElementById("openPasswordEditBtn").addEventListener("click", () => {
+    const isOpen = document.getElementById("passwordEdit").style.display === "block";
+    closeAllEditPanels();
+    if (isOpen) return; // toggle off
+    document.getElementById("pwCurrent").value = "";
+    document.getElementById("pwNew").value = "";
+    document.getElementById("pwConfirm").value = "";
+    document.getElementById("passwordEditError").style.display = "none";
+    document.getElementById("passwordEdit").style.display = "block";
+  });
+  document.getElementById("cancelPasswordBtn").addEventListener("click", closeAllEditPanels);
+  document.getElementById("savePasswordBtn").addEventListener("click", () => {
+    const errEl = document.getElementById("passwordEditError");
+    errEl.style.display = "none";
+    const current = document.getElementById("pwCurrent").value;
+    const next = document.getElementById("pwNew").value;
+    const confirm = document.getElementById("pwConfirm").value;
+    if (!current || !next) { errEl.textContent = "Please fill in both password fields."; errEl.style.display = "block"; return; }
+    if (next.length < 6) { errEl.textContent = "New password must be at least 6 characters."; errEl.style.display = "block"; return; }
+    if (next !== confirm) { errEl.textContent = "New passwords don't match."; errEl.style.display = "block"; return; }
+
+    const btn = document.getElementById("savePasswordBtn");
+    btn.disabled = true; btn.textContent = "Saving...";
+    const email = document.getElementById("profEmail").textContent.trim();
+    const credential = firebase.auth.EmailAuthProvider.credential(email, current);
+    auth.currentUser.reauthenticateWithCredential(credential)
+      .then(() => auth.currentUser.updatePassword(next))
+      .then(() => { closeAllEditPanels(); toast("Password changed!"); })
+      .catch(ex => {
+        let msg = "Could not change password. Please try again.";
+        if (ex.code === "auth/wrong-password") msg = "Current password is incorrect.";
+        errEl.textContent = msg;
+        errEl.style.display = "block";
+      })
+      .finally(() => { btn.disabled = false; btn.textContent = "Save"; });
+  });
+
+  // ---- Profile Edit (name / phone / email) ----
+  document.getElementById("openProfileEditBtn").addEventListener("click", () => {
+    const isOpen = document.getElementById("profileEdit").style.display === "block";
+    closeAllEditPanels();
+    if (isOpen) return; // toggle off
+    document.getElementById("peName").value = document.getElementById("profName").textContent.trim();
+    document.getElementById("pePhone").value = document.getElementById("profPhone").textContent.trim();
+    document.getElementById("peEmail").value = document.getElementById("profEmail").textContent.trim();
+    document.getElementById("pePassword").value = "";
+    document.getElementById("pePasswordGroup").style.display = "none";
+    document.getElementById("profileEditError").style.display = "none";
+    document.getElementById("profileEdit").style.display = "block";
+  });
+  document.getElementById("cancelProfileBtn").addEventListener("click", closeAllEditPanels);
+
+  // Show the "current password" field only once the email is actually
+  // being changed — Firebase requires a recent sign-in to change email.
+  document.getElementById("peEmail").addEventListener("input", () => {
+    const changed = document.getElementById("peEmail").value.trim().toLowerCase() !== document.getElementById("profEmail").textContent.trim().toLowerCase();
+    document.getElementById("pePasswordGroup").style.display = changed ? "block" : "none";
+  });
+
+  document.getElementById("saveProfileBtn").addEventListener("click", () => {
+    const errEl = document.getElementById("profileEditError");
+    errEl.style.display = "none";
+    const name = document.getElementById("peName").value.trim();
+    const phone = document.getElementById("pePhone").value.trim();
+    const newEmail = document.getElementById("peEmail").value.trim();
+    const currentEmail = document.getElementById("profEmail").textContent.trim();
+    const password = document.getElementById("pePassword").value;
+    const emailChanged = newEmail.toLowerCase() !== currentEmail.toLowerCase();
+    const saveBtn = document.getElementById("saveProfileBtn");
+
+    if (!name || !phone) { errEl.textContent = "Name and mobile number can't be empty."; errEl.style.display = "block"; return; }
+    if (emailChanged && !password) { errEl.textContent = "Enter your current password to change your email."; errEl.style.display = "block"; return; }
+
+    saveBtn.disabled = true; saveBtn.textContent = "Saving...";
+
+    const finish = () => NurevaStore.Customer.updateProfile({ name, phone, email: emailChanged ? newEmail : currentEmail }).then(() => {
+      document.getElementById("profName").textContent = name;
+      document.getElementById("profPhone").textContent = phone;
+      document.getElementById("profEmail").textContent = emailChanged ? newEmail : currentEmail;
+      closeAllEditPanels();
+      toast("Profile updated!");
+    });
+
+    let emailStep = Promise.resolve();
+    if (emailChanged) {
+      const credential = firebase.auth.EmailAuthProvider.credential(currentEmail, password);
+      emailStep = auth.currentUser.reauthenticateWithCredential(credential)
+        .then(() => auth.currentUser.updateEmail(newEmail));
+    }
+
+    emailStep.then(finish).catch(ex => {
+      let msg = "Could not save changes. Please try again.";
+      if (ex.code === "auth/wrong-password") msg = "Incorrect password.";
+      else if (ex.code === "auth/email-already-in-use") msg = "This email is already in use by another account.";
+      else if (ex.code === "auth/invalid-email") msg = "Please enter a valid email address.";
+      errEl.textContent = msg;
+      errEl.style.display = "block";
+    }).finally(() => { saveBtn.disabled = false; saveBtn.textContent = "Save"; });
   });
 
   NurevaStore.Customer.onAuthChange(user => {
@@ -289,8 +437,11 @@
         document.getElementById("profPhone").textContent = profile.phone || "";
         document.getElementById("profEmail").textContent = profile.email || "";
         const addr = profile.address || "";
-        document.getElementById("profAddress").textContent = addr ? ("📍 " + addr) : "";
+        const district = profile.district || "";
+        const label = [district, addr].filter(Boolean).join(" — ");
+        document.getElementById("profAddress").textContent = label ? ("📍 " + label) : "";
         document.getElementById("profAddress").dataset.raw = addr;
+        document.getElementById("profAddress").dataset.district = district;
       });
     } else {
       loggedOut.style.display = "block";

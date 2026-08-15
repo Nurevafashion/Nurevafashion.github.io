@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkout — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=41">
+<link rel="stylesheet" href="style.css?v=44">
 <style>
   .checkout-wrap { display:grid; grid-template-columns:1.4fr 1fr; gap:30px; }
   .order-box { background:var(--white); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); height:fit-content; }
@@ -42,7 +42,10 @@
       <div class="form-group"><label>Full Name *</label><input type="text" id="custName" required></div>
       <div class="form-row">
         <div class="form-group"><label>Mobile Number *</label><input type="tel" id="custPhone" required placeholder="01XXXXXXXXX"></div>
-        <div class="form-group"><label>District *</label><input type="text" id="custDistrict" required></div>
+        <div class="form-group">
+          <label>District *</label>
+          <select id="custDistrict" required></select>
+        </div>
       </div>
       <div class="form-group"><label>Full Address *</label><textarea id="custAddress" required></textarea></div>
       <div class="form-group">
@@ -83,13 +86,14 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js" onerror="nurevaRetryLoad()"></script>
-<script src="firebase-config.js?v=41" onerror="nurevaRetryLoad()"></script>
-<script src="store.js?v=41" onerror="nurevaRetryLoad()"></script>
-<script src="site.js?v=41"></script>
+<script src="firebase-config.js?v=44" onerror="nurevaRetryLoad()"></script>
+<script src="store.js?v=44" onerror="nurevaRetryLoad()"></script>
+<script src="site.js?v=44"></script>
 <script>
   /* Same line-item key cart.html uses, so a selection made there ("mark
      items to buy") maps back to the exact cart rows here. */
   function lineKey(c) { return [c.productId, c.size, c.color].join("::"); }
+  populateDistrictSelect(document.getElementById("custDistrict"));
 
   // Registered immediately (not inside NurevaStore.ready.then) — see the
   // matching note in track-order.html for why: Firebase Auth's one-time
@@ -102,9 +106,11 @@
       const nameEl = document.getElementById("custName");
       const phoneEl = document.getElementById("custPhone");
       const addrEl = document.getElementById("custAddress");
+      const distEl = document.getElementById("custDistrict");
       if (nameEl && profile.name) nameEl.value = profile.name;
       if (phoneEl && profile.phone) phoneEl.value = profile.phone;
       if (addrEl && profile.address) addrEl.value = profile.address;
+      if (distEl && profile.district) { distEl.value = profile.district; distEl.dispatchEvent(new Event("change")); }
     });
   });
 
@@ -146,6 +152,20 @@
       r.closest(".radio-card").classList.add("selected");
       fee = updateTotals();
     }));
+
+    // Picking a district automatically selects the matching delivery
+    // zone (Dhaka → Inside Dhaka, anything else → Outside Dhaka) — the
+    // customer can still switch the zone manually afterwards if needed.
+    document.getElementById("custDistrict").addEventListener("change", (e) => {
+      const zoneValue = e.target.value === "Dhaka" ? "inside" : "outside";
+      const radio = document.querySelector(`input[name="zone"][value="${zoneValue}"]`);
+      if (radio && !radio.checked) {
+        radio.checked = true;
+        document.querySelectorAll(".radio-card").forEach(c => c.classList.remove("selected"));
+        radio.closest(".radio-card").classList.add("selected");
+        fee = updateTotals();
+      }
+    });
 
     document.getElementById("checkoutForm").addEventListener("submit", (e) => {      e.preventDefault();
       const order = {
