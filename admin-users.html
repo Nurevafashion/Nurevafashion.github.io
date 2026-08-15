@@ -3,11 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>News / Notice — Nureva Fashion Admin</title>
+<title>Account Users — Nureva Fashion Admin</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="style.css?v=39">
 <link rel="stylesheet" href="admin.css?v=39">
+<style>
+  .user-card { background:var(--white); border-radius:var(--radius); padding:16px 18px; box-shadow:0 6px 20px rgba(198,0,126,0.08); margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; gap:14px; cursor:pointer; transition:box-shadow 0.15s; }
+  .user-card:hover { box-shadow:0 6px 20px rgba(198,0,126,0.2); }
+  .user-card .u-main strong { font-size:1rem; }
+  .user-card .u-main .u-sub { color:#8A5875; font-size:0.85rem; margin-top:2px; }
+  .user-card .u-badges { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+  .u-badge { font-size:0.78rem; font-weight:600; padding:5px 10px; border-radius:20px; white-space:nowrap; }
+  .u-badge.spent { background:#E8F6EC; color:#1E7B3A; }
+  .u-badge.orders { background:var(--admin-pink-soft); color:var(--admin-pink-dark); }
+  .u-badge.cancel { background:#FFE9EC; color:#C0143C; }
+  .user-search { margin-bottom:16px; }
+  .user-search input { width:100%; box-sizing:border-box; padding:11px 14px; border-radius:var(--radius); border:1.5px solid rgba(0,0,0,0.12); font-size:0.92rem; }
+  .detail-row { display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid rgba(0,0,0,0.06); font-size:0.92rem; }
+  .detail-row:last-child { border-bottom:none; }
+  .detail-row span:first-child { color:#8A5875; }
+  .detail-row span:last-child { font-weight:600; text-align:right; }
+  .detail-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0; }
+  .detail-stats .stat-card { padding:14px; }
+  .detail-order-item { background:#FAF7F5; border-radius:var(--radius); padding:10px 12px; margin-bottom:8px; font-size:0.85rem; }
+  .detail-order-item .doi-head { display:flex; justify-content:space-between; font-weight:600; }
+  #userModal .modal-box { max-width: 620px; max-height: 86vh; overflow-y: auto; }
+</style>
 </head>
 <body class="admin-body">
 
@@ -33,14 +55,23 @@
   <main class="admin-main">
     <button class="admin-mobile-toggle" id="adminMobileToggle">☰ Menu</button>
     <section class="admin-panel">
-      <h2>News / Notices (shown in the homepage ticker)</h2>
-      <form id="newsForm" class="admin-inline-form">
-        <input type="text" id="newsInput" placeholder="Write a new notice... e.g. Eid Offer is live!" required>
-        <button class="btn btn-primary" type="submit">Add</button>
-      </form>
-      <div id="newsList" class="admin-list"></div>
+      <h2>Account Users</h2>
+      <div class="stat-grid" id="userStatGrid" style="margin-bottom:20px"></div>
+      <div class="user-search"><input type="text" id="userSearch" placeholder="Search by name, phone or email..."></div>
+      <div id="usersList"></div>
     </section>
   </main>
+</div>
+
+<!-- User detail modal -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="umName">—</h3>
+      <button id="umClose">✕</button>
+    </div>
+    <div id="umBody"></div>
+  </div>
 </div>
 
 <script>

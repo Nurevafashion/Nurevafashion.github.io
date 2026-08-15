@@ -5,15 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Track Order — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=38">
+<link rel="stylesheet" href="style.css?v=39">
 <style>
-  .track-wrap { max-width: 480px; margin: 0 auto; padding: 36px 20px 60px; box-sizing: border-box; }
-  .track-form { display: flex; gap: 10px; margin-bottom: 26px; }
-  .track-form input { flex: 1; min-width: 0; padding: 12px 14px; border: 1px solid rgba(59,31,50,0.25); border-radius: var(--radius); font-size: 0.95rem; box-sizing: border-box; }
-  .order-card { background: var(--white); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); margin-bottom: 16px; }
-  .order-card .row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.9rem; }
-  .order-card .oid { font-weight: 700; color: var(--primary); font-family: var(--font-display); }
-  .order-card .items { color: var(--mauve); font-size: 0.85rem; margin: 8px 0; }
+  .track-wrap { max-width: 480px; margin: 0 auto; padding: 30px 20px 60px; box-sizing: border-box; }
+  .track-order-card { background: var(--white); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); margin-bottom: 12px; }
+  .track-order-card .toc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .track-order-card .toc-date { font-size: 0.78rem; color: var(--mauve); }
+  .toc-status { font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 10px; white-space: nowrap; }
+  .toc-status.st-new { background: rgba(198,0,126,0.12); color: #C6007E; }
+  .toc-status.st-processing { background: rgba(230,160,0,0.15); color: #B87E00; }
+  .toc-status.st-shipped { background: rgba(30,110,200,0.12); color: #1E6EC8; }
+  .toc-status.st-delivered { background: rgba(60,107,74,0.12); color: var(--success); }
+  .toc-status.st-cancelled { background: rgba(192,20,60,0.12); color: #C0143C; }
+  .track-order-card .toc-items { font-size: 0.85rem; color: var(--primary); margin: 6px 0; line-height: 1.4; }
+  .track-order-card .toc-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .track-order-card .toc-total { font-weight: 700; font-size: 0.9rem; }
+  .track-order-card .toc-eta { font-size: 0.78rem; color: var(--mauve); margin-top: 2px; }
+  .toc-cancel-btn { border: 1.5px solid #C0143C; background: #FFF0F3; color: #C0143C; font-weight: 600; padding: 6px 12px; border-radius: var(--radius); font-size: 0.78rem; }
+  .toc-cancel-btn:hover { background: #C0143C; color: #fff; }
+  .guest-lookup-toggle { text-align: center; margin-top: 22px; }
+  .guest-lookup-toggle button { background: none; border: none; color: var(--mauve); font-size: 0.85rem; text-decoration: underline; cursor: pointer; }
+  .guest-lookup-form { display: none; gap: 10px; margin-top: 14px; }
+  .guest-lookup-form.open { display: flex; }
+  .guest-lookup-form input { flex: 1; min-width: 0; padding: 12px 14px; border: 1px solid rgba(59,31,50,0.25); border-radius: var(--radius); font-size: 0.95rem; box-sizing: border-box; }
 </style>
 </head>
 <body>
@@ -26,8 +40,7 @@
       <a href="products.html?filter=new">New Arrivals</a>
       <a href="offers.html">Offers</a>
       <a href="products.html?cat=Nureva%20Signature">Nureva Signature</a>
-      <a href="track-order.html">My Orders</a>
-      <a href="contact.html">Contact</a>
+            <a href="contact.html">Contact</a>
     </nav>
     <div class="header-actions">
       <button class="icon-btn icon-btn-round" id="searchToggle" aria-label="Search">
@@ -59,24 +72,27 @@
   <a href="products.html?cat=Panjabi">Panjabi</a>
   <a href="products.html?cat=Nureva%20Signature">Nureva Signature</a>
   <a href="products.html?cat=Nureva%20Classic">Nureva Classic</a>
-  <a href="track-order.html">My Orders</a>
-      <a href="contact.html">Contact</a>
+        <a href="contact.html">Contact</a>
   <a data-fb-link href="#" target="_blank" rel="noopener">Facebook Page</a>
 </nav>
 
 <div class="page-hero">
   <div class="container">
     <h1>Track Your Order</h1>
-    <p>Enter the mobile number you used at checkout</p>
+    <p id="trackSubtitle">Here are your orders and their current status</p>
   </div>
 </div>
 
 <div class="track-wrap">
-  <form class="track-form" id="trackForm">
-    <input type="tel" id="trackPhone" placeholder="e.g. 01XXXXXXXXX" required>
-    <button class="btn btn-primary btn-sm" type="submit" style="flex-shrink:0;white-space:nowrap">Track</button>
-  </form>
   <div id="trackResults"></div>
+
+  <div id="guestLookupWrap" style="display:none">
+    <div class="guest-lookup-toggle"><button type="button" id="guestLookupToggle">Ordered as a guest? Look up by mobile number</button></div>
+    <form class="guest-lookup-form" id="guestLookupForm">
+      <input type="tel" id="guestPhone" placeholder="e.g. 01XXXXXXXXX" required>
+      <button class="btn btn-primary btn-sm" type="submit" style="flex-shrink:0;white-space:nowrap">Find</button>
+    </form>
+  </div>
 </div>
 
 <div class="topbar">Cash on Delivery Nationwide &nbsp;•&nbsp; Order via Facebook or our website</div>
@@ -98,29 +114,105 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js" onerror="nurevaRetryLoad()"></script>
-<script src="firebase-config.js?v=38" onerror="nurevaRetryLoad()"></script>
-<script src="store.js?v=38" onerror="nurevaRetryLoad()"></script>
-<script src="site.js?v=38"></script>
+<script src="firebase-config.js?v=39" onerror="nurevaRetryLoad()"></script>
+<script src="store.js?v=39" onerror="nurevaRetryLoad()"></script>
+<script src="site.js?v=39"></script>
 <script>
-  NurevaStore.ready.then(() => { applySettings(); renderFooter(); });
+  const trackResultsEl = document.getElementById("trackResults");
+  const trackSubtitle = document.getElementById("trackSubtitle");
+  const guestLookupWrap = document.getElementById("guestLookupWrap");
+  let currentPhone = null;
 
-  document.getElementById("trackForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const phone = document.getElementById("trackPhone").value.trim();
-    const results = NurevaStore.Orders.byPhone(phone);
-    const el = document.getElementById("trackResults");
-    if (!results.length) {
-      el.innerHTML = `<div class="empty-state"><h3>No orders found</h3><p>No order was found for this number. Please check the number and try again.</p></div>`;
+  const CANCELLABLE_STATUSES = ["New", "Processing"];
+
+  function statusClass(status) {
+    return "st-" + String(status || "new").toLowerCase();
+  }
+
+  /* Rough delivery estimate shown alongside the status, since orders don't
+     store an exact delivery date. District/zone isn't reliably present on
+     every order, so this is intentionally a simple range from order date. */
+  function estimateDelivery(order) {
+    if (order.status === "Delivered") return "Delivered";
+    if (order.status === "Cancelled") return "Order cancelled";
+    const days = (order.deliveryFee && order.deliveryFee > 80) ? [4, 7] : [2, 4];
+    const from = new Date(order.date); from.setDate(from.getDate() + days[0]);
+    const to = new Date(order.date); to.setDate(to.getDate() + days[1]);
+    const fmt = (d) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    return "Expected: " + fmt(from) + " – " + fmt(to);
+  }
+
+  function renderOrderList(orders) {
+    if (!orders.length) {
+      trackResultsEl.innerHTML = `<div class="empty-state"><h3>No orders yet</h3><p>Your placed orders will show up here.</p></div>`;
       return;
     }
-    el.innerHTML = results.map(o => `
-      <div class="order-card">
-        <div class="row"><span class="oid">${o.id}</span><span class="tag status" style="background:rgba(60,107,74,0.12);color:var(--success);padding:3px 10px;border-radius:10px;font-size:0.75rem;font-weight:700">${o.status}</span></div>
-        <div class="row"><span>Order Date</span><span>${new Date(o.date).toLocaleDateString()}</span></div>
-        <div class="items">${o.items.map(i => i.name + " ×" + i.qty).join(", ")}</div>
-        <div class="row"><strong>Total</strong><strong>${formatTaka(o.total)}</strong></div>
+    const sorted = [...orders].sort((a, b) => b.date - a.date);
+    trackResultsEl.innerHTML = sorted.map(o => `
+      <div class="track-order-card" data-id="${o.id}">
+        <div class="toc-head">
+          <span class="toc-date">${new Date(o.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
+          <span class="toc-status ${statusClass(o.status)}">${o.status}</span>
+        </div>
+        <div class="toc-items">${o.items.map(i => i.name + " ×" + i.qty).join(", ")}</div>
+        <div class="toc-eta">${estimateDelivery(o)}</div>
+        <div class="toc-foot">
+          <span class="toc-total">${formatTaka(o.total)}</span>
+          ${CANCELLABLE_STATUSES.includes(o.status) ? `<button type="button" class="toc-cancel-btn" data-id="${o.id}">Cancel Order</button>` : ""}
+        </div>
       </div>
     `).join("");
+
+    trackResultsEl.querySelectorAll(".toc-cancel-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (!confirm("Cancel this order?")) return;
+        btn.disabled = true;
+        btn.textContent = "Cancelling...";
+        NurevaStore.Orders.updateStatus(btn.dataset.id, "Cancelled")
+          .then(() => toast("Order cancelled"))
+          .catch(() => { toast("Could not cancel. Please try again."); btn.disabled = false; btn.textContent = "Cancel Order"; });
+      });
+    });
+  }
+
+  function showOrdersForPhone(phone) {
+    currentPhone = phone;
+    renderOrderList(NurevaStore.Orders.byPhone(phone));
+  }
+
+  NurevaStore.ready.then(() => {
+    applySettings(); renderFooter();
+
+    // Re-render live whenever order data changes (status updates, cancellations, etc.)
+    NurevaStore.onChange(() => { if (currentPhone) renderOrderList(NurevaStore.Orders.byPhone(currentPhone)); });
+
+    NurevaStore.Customer.onAuthChange(user => {
+      if (user) {
+        guestLookupWrap.style.display = "none";
+        trackSubtitle.textContent = "Here are your orders and their current status";
+        NurevaStore.Customer.getProfile().then(profile => {
+          if (profile && profile.phone) {
+            showOrdersForPhone(profile.phone);
+          } else {
+            trackResultsEl.innerHTML = `<div class="empty-state"><h3>No mobile number on file</h3><p>Add your mobile number in Account settings to see your orders here.</p></div>`;
+          }
+        });
+      } else {
+        trackSubtitle.textContent = "Log in to see your orders automatically";
+        trackResultsEl.innerHTML = `<div class="empty-state"><h3>Not logged in</h3><p>Log in to your account to see your orders here automatically.</p><a href="account.html" class="btn btn-primary" style="margin-top:14px">Log In / Sign Up</a></div>`;
+        guestLookupWrap.style.display = "block";
+      }
+    });
+  });
+
+  document.getElementById("guestLookupToggle").addEventListener("click", () => {
+    document.getElementById("guestLookupForm").classList.toggle("open");
+  });
+  document.getElementById("guestLookupForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const phone = document.getElementById("guestPhone").value.trim();
+    trackSubtitle.textContent = "Orders for " + phone;
+    showOrdersForPhone(phone);
   });
 </script>
 </body>

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkout — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=38">
+<link rel="stylesheet" href="style.css?v=39">
 <style>
   .checkout-wrap { display:grid; grid-template-columns:1.4fr 1fr; gap:30px; }
   .order-box { background:var(--white); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); height:fit-content; }
@@ -31,8 +31,7 @@
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <nav class="nav-drawer" id="navDrawer">
   <button class="drawer-close" id="drawerClose">✕</button>
-  <a href="products.html">All Products</a><a href="track-order.html">My Orders</a>
-      <a href="contact.html">Contact</a>
+  <a href="products.html">All Products</a>      <a href="contact.html">Contact</a>
 </nav>
 
 <div class="page-hero"><div class="container"><h1>Checkout</h1></div></div>
@@ -84,13 +83,27 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js" onerror="nurevaRetryLoad()"></script>
-<script src="firebase-config.js?v=38" onerror="nurevaRetryLoad()"></script>
-<script src="store.js?v=38" onerror="nurevaRetryLoad()"></script>
-<script src="site.js?v=38"></script>
+<script src="firebase-config.js?v=39" onerror="nurevaRetryLoad()"></script>
+<script src="store.js?v=39" onerror="nurevaRetryLoad()"></script>
+<script src="site.js?v=39"></script>
 <script>
+  /* Same line-item key cart.html uses, so a selection made there ("mark
+     items to buy") maps back to the exact cart rows here. */
+  function lineKey(c) { return [c.productId, c.size, c.color].join("::"); }
+
   NurevaStore.ready.then(() => {
     applySettings(); renderFooter();
-    const cart = getCart();
+    const fullCart = getCart();
+    let cart = fullCart;
+    let selectionKeys = null;
+    try {
+      const raw = sessionStorage.getItem("nureva_checkout_selection");
+      if (raw) selectionKeys = JSON.parse(raw);
+    } catch (e) {}
+    if (selectionKeys && selectionKeys.length) {
+      const keySet = new Set(selectionKeys);
+      cart = fullCart.filter(c => keySet.has(lineKey(c)));
+    }
     const settings = NurevaStore.Settings.get();
     const container = document.getElementById("checkoutContainer");
 
@@ -134,7 +147,11 @@
         paymentMethod: "Cash on Delivery",
       };
       NurevaStore.Orders.add(order).then(() => {
-        saveCart([]);
+        // Only remove the items that were actually ordered; anything left
+        // unselected in the cart stays saved for later.
+        const orderedKeys = new Set(cart.map(lineKey));
+        saveCart(fullCart.filter(c => !orderedKeys.has(lineKey(c))));
+        try { sessionStorage.removeItem("nureva_checkout_selection"); } catch (e) {}
         container.innerHTML = `<div class="empty-state">
           <h3>🎉 Order placed successfully!</h3>
           <p>We'll contact you soon on the number you provided.</p>

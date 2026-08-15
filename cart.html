@@ -5,23 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cart — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=38">
+<link rel="stylesheet" href="style.css?v=39">
 <style>
-  .cart-row { background:var(--white); border:1px solid rgba(0,0,0,0.08); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow); margin-bottom:14px; }
-  .cart-row-top { display:flex; gap:14px; align-items:flex-start; }
-  .cart-row img { width:76px; height:92px; object-fit:cover; border-radius:4px; cursor:zoom-in; flex-shrink:0; border:1px solid rgba(0,0,0,0.08); }
+  .cart-toolbar { display:flex; align-items:center; justify-content:space-between; background:var(--white); border-radius:var(--radius); padding:12px 16px; box-shadow:var(--shadow); margin-bottom:14px; }
+  .cart-toolbar label { display:flex; align-items:center; gap:10px; font-size:0.88rem; font-weight:600; cursor:pointer; }
+  .cart-toolbar .cart-count-txt { color:var(--mauve); font-size:0.82rem; font-weight:400; }
+  .cb { width:19px; height:19px; accent-color:var(--primary); cursor:pointer; flex-shrink:0; }
+
+  .cart-row { background:var(--white); border:1px solid rgba(0,0,0,0.06); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow); margin-bottom:12px; transition:opacity 0.15s; }
+  .cart-row.unselected { opacity:0.55; }
+  .cart-row-top { display:flex; gap:12px; align-items:flex-start; }
+  .cart-row img { width:70px; height:86px; object-fit:cover; border-radius:6px; cursor:zoom-in; flex-shrink:0; border:1px solid rgba(0,0,0,0.08); }
   .cart-row .info { flex:1; min-width:0; }
-  .cart-row .meta { font-size:0.82rem; color:var(--mauve); margin-top:2px; }
-  .cart-row .remove {
-    margin-top:12px; width:100%; display:flex; align-items:center; justify-content:center; gap:8px;
-    background:#FFFFFF; border:1.5px solid var(--danger); color:var(--danger); font-size:0.88rem; font-weight:600;
-    padding:10px; border-radius:var(--radius);
-  }
-  .cart-row .remove:hover, .cart-row .remove:active { background:var(--danger); color:#fff; }
-  .cart-row .remove svg { width:16px; height:16px; }
-  .cart-summary { background:var(--white); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); }
-  .cart-summary .row { display:flex; justify-content:space-between; margin-bottom:10px; }
+  .cart-row .info .name { font-weight:600; font-size:0.95rem; line-height:1.3; }
+  .cart-row .meta { font-size:0.8rem; color:var(--mauve); margin-top:3px; }
+  .cart-row .price-each { font-size:0.78rem; color:var(--mauve); margin-top:2px; }
+  .cart-row .line-total { color:var(--primary); font-weight:700; margin-top:6px; font-size:0.98rem; }
+
+  .cart-row-bottom { display:flex; align-items:center; justify-content:space-between; margin-top:12px; padding-top:12px; border-top:1px dashed rgba(0,0,0,0.1); }
+  .qty-stepper { display:flex; align-items:center; border:1.5px solid rgba(59,31,50,0.2); border-radius:20px; overflow:hidden; }
+  .qty-stepper button { width:30px; height:30px; border:none; background:rgba(59,31,50,0.06); color:var(--primary); font-size:1.05rem; font-weight:700; line-height:1; cursor:pointer; }
+  .qty-stepper button:active { background:rgba(59,31,50,0.1); }
+  .qty-stepper span { width:32px; text-align:center; font-weight:600; font-size:0.9rem; }
+  .cart-row .remove-link { border:none; background:none; color:var(--danger); font-size:0.82rem; font-weight:600; display:flex; align-items:center; gap:5px; cursor:pointer; }
+  .cart-row .remove-link svg { width:15px; height:15px; }
+
+  .cart-summary { background:var(--white); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); position:sticky; top:16px; }
+  .cart-summary h3 { font-family:var(--font-display); color:var(--primary); margin-bottom:14px; font-size:1.1rem; }
+  .cart-summary .row { display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.92rem; }
+  .cart-summary .row .sel-count { color:var(--mauve); font-size:0.78rem; }
   .cart-summary .total { font-weight:700; font-size:1.15rem; color:var(--primary); border-top:1px dashed var(--gold); padding-top:12px; }
+  .cart-summary .checkout-hint { font-size:0.78rem; color:var(--mauve); text-align:center; margin-top:10px; }
+  @media (max-width:900px){ #cartLayout{ grid-template-columns:1fr !important; } .cart-summary{ position:static; } }
 </style>
 </head>
 <body>
@@ -32,8 +47,7 @@
     <nav class="main-nav">
           <a href="products.html">All Products</a>
       <a href="offers.html">Offers</a>
-      <a href="track-order.html">My Orders</a>
-      <a href="contact.html">Contact</a>
+            <a href="contact.html">Contact</a>
     </nav>
     <div class="header-actions">
       <button class="icon-btn icon-btn-round" id="searchToggle" aria-label="Search">
@@ -50,20 +64,26 @@
   <button class="drawer-close" id="drawerClose">✕</button>
   <a href="products.html">All Products</a>
   <a href="offers.html">Offers</a>
-  <a href="track-order.html">My Orders</a>
-      <a href="contact.html">Contact</a>
+        <a href="contact.html">Contact</a>
 </nav>
 
 <div class="page-hero"><div class="container"><h1>Your Cart</h1></div></div>
 
 <div class="container" style="padding:36px 20px">
   <div style="display:grid;grid-template-columns:2fr 1fr;gap:30px" id="cartLayout">
-    <div id="cartList"></div>
+    <div>
+      <div class="cart-toolbar" id="cartToolbar" style="display:none">
+        <label><input type="checkbox" class="cb" id="selectAllBox"> Select All <span class="cart-count-txt" id="cartCountTxt"></span></label>
+      </div>
+      <div id="cartList"></div>
+    </div>
     <div class="cart-summary">
-      <div class="row"><span>Subtotal</span><span id="subtotal">৳0</span></div>
-      <div class="row"><span>Delivery Fee</span><span id="deliveryFee">Calculated at checkout</span></div>
+      <h3>Order Summary</h3>
+      <div class="row"><span>Selected Items <span class="sel-count" id="selCountTxt"></span></span><span id="subtotal">৳0</span></div>
+      <div class="row"><span>Delivery Fee</span><span>Calculated at checkout</span></div>
       <div class="row total"><span>Total</span><span id="grandTotal">৳0</span></div>
-      <a href="checkout.html" class="btn btn-primary btn-block" style="margin-top:16px">Proceed to Checkout</a>
+      <button class="btn btn-primary btn-block" id="checkoutBtn" style="margin-top:16px">Proceed to Checkout</button>
+      <div class="checkout-hint" id="checkoutHint"></div>
       <a href="products.html" class="btn btn-outline btn-block" style="margin-top:10px;border-color:var(--primary);color:var(--primary)">Continue Shopping</a>
     </div>
   </div>
@@ -87,42 +107,138 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js" onerror="nurevaRetryLoad()"></script>
-<script src="firebase-config.js?v=38" onerror="nurevaRetryLoad()"></script>
-<script src="store.js?v=38" onerror="nurevaRetryLoad()"></script>
-<script src="site.js?v=38"></script>
+<script src="firebase-config.js?v=39" onerror="nurevaRetryLoad()"></script>
+<script src="store.js?v=39" onerror="nurevaRetryLoad()"></script>
+<script src="site.js?v=39"></script>
 <script>
+  /* Each cart line is identified by (productId + size + color), the same
+     key addToCart() already uses to merge duplicates, so selection state
+     survives re-renders even though the array index can shift. */
+  function lineKey(c) { return [c.productId, c.size, c.color].join("::"); }
+
+  let selected = new Set(); // set of lineKeys currently checked
+
   function renderCart() {
     const cart = getCart();
     const listEl = document.getElementById("cartList");
+    const toolbar = document.getElementById("cartToolbar");
+
     if (!cart.length) {
+      toolbar.style.display = "none";
       listEl.innerHTML = `<div class="empty-state"><h3>Your cart is empty</h3><p>Add products to start shopping</p><a href="products.html" class="btn btn-primary" style="margin-top:14px">Browse Products</a></div>`;
-      document.getElementById("subtotal").textContent = document.getElementById("grandTotal").textContent = formatTaka(0);
+      updateSummary([]);
       return;
     }
-    listEl.innerHTML = cart.map((c, i) => `
-      <div class="cart-row">
+
+    // keep selection in sync with current cart contents; default new items to selected
+    const keysNow = new Set(cart.map(lineKey));
+    if (selected.size === 0 && !document.body.dataset.userTouchedSelection) {
+      cart.forEach(c => selected.add(lineKey(c)));
+    } else {
+      [...selected].forEach(k => { if (!keysNow.has(k)) selected.delete(k); });
+    }
+
+    toolbar.style.display = "flex";
+    document.getElementById("cartCountTxt").textContent = `(${cart.length} item${cart.length > 1 ? "s" : ""})`;
+    document.getElementById("selectAllBox").checked = cart.every(c => selected.has(lineKey(c)));
+
+    listEl.innerHTML = cart.map((c, i) => {
+      const key = lineKey(c);
+      const isSel = selected.has(key);
+      return `
+      <div class="cart-row ${isSel ? "" : "unselected"}" data-key="${key}">
         <div class="cart-row-top">
+          <input type="checkbox" class="cb sel-box" data-key="${key}" ${isSel ? "checked" : ""} style="margin-top:6px">
           <img src="${c.image}" alt="${c.name}" class="cart-img" data-i="${i}">
           <div class="info">
-            <div style="font-weight:600">${c.name}</div>
-            <div class="meta">Size: ${c.size} · Colour: ${c.color} · Qty: ${c.qty}</div>
-            <div style="color:var(--primary);font-weight:700;margin-top:4px">${formatTaka(c.price * c.qty)}</div>
+            <div class="name">${c.name}</div>
+            <div class="meta">Size: ${c.size} · Colour: ${c.color}</div>
+            <div class="price-each">${formatTaka(c.price)} each</div>
+            <div class="line-total">${formatTaka(c.price * c.qty)}</div>
           </div>
         </div>
-        <button class="remove" data-i="${i}" aria-label="Remove">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-          Remove
-        </button>
+        <div class="cart-row-bottom">
+          <div class="qty-stepper">
+            <button type="button" class="qty-minus" data-key="${key}" aria-label="Decrease">−</button>
+            <span>${c.qty}</span>
+            <button type="button" class="qty-plus" data-key="${key}" aria-label="Increase">+</button>
+          </div>
+          <button class="remove-link" data-key="${key}" aria-label="Remove">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            Remove
+          </button>
+        </div>
       </div>
-    `).join("");
+    `;
+    }).join("");
+
     document.querySelectorAll(".cart-img").forEach(img => img.addEventListener("click", () => openLightbox(img.src)));
-    document.querySelectorAll(".remove").forEach(b => b.addEventListener("click", () => {
-      const c = getCart(); c.splice(Number(b.dataset.i), 1); saveCart(c); renderCart();
+
+    listEl.querySelectorAll(".sel-box").forEach(box => box.addEventListener("change", () => {
+      document.body.dataset.userTouchedSelection = "1";
+      if (box.checked) selected.add(box.dataset.key); else selected.delete(box.dataset.key);
+      renderCart();
     }));
-    const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
+
+    listEl.querySelectorAll(".qty-plus").forEach(b => b.addEventListener("click", () => changeQty(b.dataset.key, 1)));
+    listEl.querySelectorAll(".qty-minus").forEach(b => b.addEventListener("click", () => changeQty(b.dataset.key, -1)));
+    listEl.querySelectorAll(".remove-link").forEach(b => b.addEventListener("click", () => {
+      const c = getCart().filter(item => lineKey(item) !== b.dataset.key);
+      saveCart(c);
+      selected.delete(b.dataset.key);
+      renderCart();
+    }));
+
+    updateSummary(cart);
+  }
+
+  function changeQty(key, delta) {
+    const cart = getCart();
+    const item = cart.find(c => lineKey(c) === key);
+    if (!item) return;
+    item.qty = Math.max(1, item.qty + delta);
+    saveCart(cart);
+    renderCart();
+  }
+
+  function updateSummary(cart) {
+    const selectedItems = cart.filter(c => selected.has(lineKey(c)));
+    const subtotal = selectedItems.reduce((s, c) => s + c.price * c.qty, 0);
     document.getElementById("subtotal").textContent = formatTaka(subtotal);
     document.getElementById("grandTotal").textContent = formatTaka(subtotal);
+    const selQty = selectedItems.reduce((s, c) => s + c.qty, 0);
+    document.getElementById("selCountTxt").textContent = selectedItems.length ? `(${selQty} pcs)` : "";
+    const btn = document.getElementById("checkoutBtn");
+    const hint = document.getElementById("checkoutHint");
+    if (!selectedItems.length) {
+      btn.disabled = true;
+      btn.style.opacity = "0.5";
+      hint.textContent = cart.length ? "Select at least one item to checkout" : "";
+    } else {
+      btn.disabled = false;
+      btn.style.opacity = "1";
+      hint.textContent = "";
+    }
   }
+
+  document.getElementById("selectAllBox").addEventListener("change", (e) => {
+    document.body.dataset.userTouchedSelection = "1";
+    const cart = getCart();
+    if (e.target.checked) cart.forEach(c => selected.add(lineKey(c)));
+    else selected.clear();
+    renderCart();
+  });
+
+  document.getElementById("checkoutBtn").addEventListener("click", () => {
+    const cart = getCart();
+    const chosen = cart.filter(c => selected.has(lineKey(c)));
+    if (!chosen.length) return;
+    // Hand the selected lines to checkout.html without touching the rest
+    // of the cart, so unselected items stay saved for later.
+    sessionStorage.setItem("nureva_checkout_selection", JSON.stringify(chosen.map(lineKey)));
+    location.href = "checkout.html";
+  });
+
   NurevaStore.ready.then(() => { applySettings(); renderFooter(); renderCart(); });
 </script>
 </body>

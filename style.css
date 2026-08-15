@@ -104,8 +104,8 @@ nav.main-nav a.active { color: var(--primary); }
 .btn { display: inline-block; padding: 13px 30px; border-radius: var(--radius); font-weight: 600; font-size: 0.95rem; border: 1.5px solid transparent; transition: all 0.2s ease; }
 .btn-gold { background: var(--gold); color: var(--primary); }
 .btn-gold:hover { background: var(--gold-soft); }
-.btn-outline { border-color: var(--gold-soft); color: var(--ivory); }
-.btn-outline:hover { background: rgba(251,247,242,0.1); }
+.btn-outline { border-color: var(--primary); color: var(--primary); background: transparent; }
+.btn-outline:hover { background: rgba(0,0,0,0.06); }
 .btn-primary { background: var(--primary); color: var(--ivory); }
 .btn-primary:hover { background: var(--primary-light); }
 .btn-block { width: 100%; text-align: center; }

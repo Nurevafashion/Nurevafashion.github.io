@@ -182,10 +182,10 @@ const NurevaStore = (() => {
   /* ---------- Customer accounts (sign up / log in), separate from Admin ---------- */
   const Customer = {
     onAuthChange: (fn) => { customerAuthListeners.push(fn); },
-    signUp: (name, phone, email, password) => {
+    signUp: (name, phone, email, password, address) => {
       if (email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase()) return Promise.reject(new Error("This email can't be used."));
       return auth.createUserWithEmailAndPassword(email, password).then(cred =>
-        db.collection("customers").doc(cred.user.uid).set({ name, phone, email, createdAt: Date.now() })
+        db.collection("customers").doc(cred.user.uid).set({ name, phone, email, address: address || "", createdAt: Date.now() })
       );
     },
     login: (email, password) => auth.signInWithEmailAndPassword(email, password),
@@ -196,6 +196,15 @@ const NurevaStore = (() => {
       if (!user || user.email === ADMIN_EMAIL) return Promise.resolve(null);
       return db.collection("customers").doc(user.uid).get().then(doc => doc.exists ? { uid: user.uid, ...doc.data() } : null);
     },
+    /* Update the signed-in customer's own profile fields (e.g. name, phone, address). */
+    updateProfile: (patch) => {
+      const user = auth.currentUser;
+      if (!user || user.email === ADMIN_EMAIL) return Promise.reject(new Error("Not logged in"));
+      return db.collection("customers").doc(user.uid).set(patch, { merge: true });
+    },
+    /* Admin-only: realtime list of every registered customer account. */
+    listenAll: (cb) => db.collection("customers").orderBy("createdAt", "desc")
+      .onSnapshot(snap => cb(snap.docs.map(d => ({ uid: d.id, ...d.data() }))), err => console.error("customers sync error:", err)),
   };
 
   /* ---------- Live Chat (customer <-> admin, Firestore realtime) ----------

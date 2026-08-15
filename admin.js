@@ -52,6 +52,7 @@ if (isLoginPage) {
     NurevaStore.ready.then(renderCurrentPage);
     NurevaStore.onChange(renderCurrentPage);
     initChatSync();
+    initCustomersSync();
   });
 }
 
@@ -62,6 +63,7 @@ function renderCurrentPage() {
   if (document.getElementById("newsList")) renderNews();
   if (document.getElementById("orderTable")) renderOrders();
   if (document.getElementById("setSiteName")) renderSettings();
+  if (document.getElementById("usersList")) renderUsers();
 }
 
 /* ---------- Dashboard ---------- */
@@ -511,6 +513,130 @@ function initChatSync() {
   });
   if (!chatOnlineTimer) chatOnlineTimer = setInterval(() => { renderChatCustomerList(); if (selectedChatId) { const c = allChats.find(x => x.id === selectedChatId); if (c) renderConvStatus(c); } }, 15000);
 }
+
+/* ---------- Account Users ---------- */
+let allCustomers = [];
+let customersUnsub = null;
+let customersSyncStarted = false;
+
+function initCustomersSync() {
+  if (customersSyncStarted) return;
+  customersSyncStarted = true;
+  customersUnsub = NurevaStore.Customer.listenAll((customers) => {
+    allCustomers = customers;
+    if (document.getElementById("usersList")) renderUsers();
+  });
+}
+
+/* Match a customer's orders by phone number, since orders aren't linked by
+   uid (guests can also order). Cancelled orders are counted separately and
+   excluded from "money/products actually bought" totals. */
+function customerOrderStats(customer) {
+  const phone = (customer.phone || "").trim();
+  const orders = phone ? NurevaStore.Orders.byPhone(phone) : [];
+  let boughtItems = 0, boughtTotal = 0, cancelledCount = 0;
+  orders.forEach(o => {
+    if (o.status === "Cancelled") {
+      cancelledCount++;
+    } else {
+      boughtTotal += (o.total || 0);
+      boughtItems += (o.items || []).reduce((s, i) => s + (i.qty || 1), 0);
+    }
+  });
+  return { orders, orderCount: orders.length, boughtItems, boughtTotal, cancelledCount };
+}
+
+function renderUsers() {
+  const listEl = document.getElementById("usersList");
+  const statGrid = document.getElementById("userStatGrid");
+  if (!listEl) return;
+
+  const totalSpent = allCustomers.reduce((s, c) => s + customerOrderStats(c).boughtTotal, 0);
+  const totalCancelled = allCustomers.reduce((s, c) => s + customerOrderStats(c).cancelledCount, 0);
+  statGrid.innerHTML = [
+    { num: allCustomers.length, lbl: "Total Account Users" },
+    { num: taka(totalSpent), lbl: "Total Spent (all users)" },
+    { num: totalCancelled, lbl: "Total Cancelled Orders" },
+  ].map(s => `<div class="stat-card"><div class="num">${s.num}</div><div class="lbl">${s.lbl}</div></div>`).join("");
+
+  const query = (document.getElementById("userSearch").value || "").trim().toLowerCase();
+  const filtered = !query ? allCustomers : allCustomers.filter(c =>
+    (c.name || "").toLowerCase().includes(query) ||
+    (c.phone || "").toLowerCase().includes(query) ||
+    (c.email || "").toLowerCase().includes(query)
+  );
+
+  if (!filtered.length) {
+    listEl.innerHTML = `<p style="color:#8A5875;padding:20px">${allCustomers.length ? "No users match your search." : "No account users have registered yet."}</p>`;
+    return;
+  }
+
+  listEl.innerHTML = filtered.map(c => {
+    const stats = customerOrderStats(c);
+    return `
+      <div class="user-card" data-uid="${c.uid}">
+        <div class="u-main">
+          <strong>${c.name || "—"}</strong>
+          <div class="u-sub">${c.phone || "—"} · ${c.email || "—"}</div>
+        </div>
+        <div class="u-badges">
+          <span class="u-badge orders">${stats.orderCount} order(s)</span>
+          <span class="u-badge spent">${taka(stats.boughtTotal)}</span>
+          ${stats.cancelledCount ? `<span class="u-badge cancel">${stats.cancelledCount} cancelled</span>` : ""}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  listEl.querySelectorAll(".user-card").forEach(card => {
+    card.addEventListener("click", () => openUserModal(card.dataset.uid));
+  });
+}
+
+document.getElementById("userSearch")?.addEventListener("input", renderUsers);
+
+function openUserModal(uid) {
+  const c = allCustomers.find(x => x.uid === uid);
+  if (!c) return;
+  const stats = customerOrderStats(c);
+  document.getElementById("umName").textContent = c.name || "Account User";
+
+  const detailsHtml = `
+    <div class="detail-row"><span>Mobile Number</span><span>${c.phone || "—"}</span></div>
+    <div class="detail-row"><span>Email</span><span>${c.email || "—"}</span></div>
+    <div class="detail-row"><span>Address / Location</span><span>${c.address || "—"}</span></div>
+    <div class="detail-row"><span>Account Created</span><span>${c.createdAt ? new Date(c.createdAt).toLocaleDateString() : "—"}</span></div>
+  `;
+
+  const statsHtml = `
+    <div class="detail-stats">
+      <div class="stat-card"><div class="num">${stats.orderCount}</div><div class="lbl">Total Orders Placed</div></div>
+      <div class="stat-card"><div class="num">${stats.boughtItems}</div><div class="lbl">Products Bought</div></div>
+      <div class="stat-card"><div class="num">${taka(stats.boughtTotal)}</div><div class="lbl">Total Spent</div></div>
+      <div class="stat-card" style="border-left-color:#C0143C"><div class="num" style="color:#C0143C">${stats.cancelledCount}</div><div class="lbl">Orders Cancelled</div></div>
+    </div>
+  `;
+
+  const ordersHtml = stats.orders.length ? stats.orders.map(o => `
+    <div class="detail-order-item">
+      <div class="doi-head">
+        <span>${new Date(o.date).toLocaleDateString()} · ${(o.items || []).length} item(s)</span>
+        <span class="tag status">${o.status}</span>
+      </div>
+      <div style="margin-top:4px">Total: ${taka(o.total)}</div>
+    </div>
+  `).join("") : `<p style="color:#8A5875;font-size:0.85rem">No orders placed yet.</p>`;
+
+  document.getElementById("umBody").innerHTML = `
+    ${detailsHtml}
+    ${statsHtml}
+    <h4 style="font-family:var(--font-display);color:var(--admin-pink-dark);margin:6px 0 10px">Order History</h4>
+    ${ordersHtml}
+  `;
+  document.getElementById("userModal").classList.add("open");
+}
+document.getElementById("umClose")?.addEventListener("click", () => document.getElementById("userModal").classList.remove("open"));
+document.getElementById("userModal")?.addEventListener("click", (e) => { if (e.target.id === "userModal") e.target.classList.remove("open"); });
 
 /* ---------- toast ---------- */
 function toastAdmin(msg) {

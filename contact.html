@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contact — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=38">
+<link rel="stylesheet" href="style.css?v=39">
 <style>
   .contact-wrap { display:grid; grid-template-columns:1fr 1fr; gap:40px; padding:40px 0 60px; }
   .contact-card { background:var(--white); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow); margin-bottom:16px; }
@@ -29,8 +29,7 @@
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <nav class="nav-drawer" id="navDrawer">
   <button class="drawer-close" id="drawerClose">✕</button>
-  <a href="products.html">All Products</a><a href="offers.html">Offers</a><a href="track-order.html">My Orders</a>
-      <a href="contact.html">Contact</a>
+  <a href="products.html">All Products</a><a href="offers.html">Offers</a>      <a href="contact.html">Contact</a>
 </nav>
 
 <div class="page-hero"><div class="container"><h1>Get in Touch</h1><p>Have a question or need help with an order? Reach out to us.</p></div></div>
@@ -52,10 +51,10 @@
       </div>
     </div>
     <form class="contact-card" id="contactForm">
-      <div class="form-group"><label>Your Name</label><input type="text" required></div>
-      <div class="form-group"><label>Mobile Number</label><input type="tel" required></div>
-      <div class="form-group"><label>Message</label><textarea required placeholder="Write your question..."></textarea></div>
-      <button type="submit" class="btn btn-primary btn-block">Send Message</button>
+      <div class="form-group"><label>Your Name</label><input type="text" id="cfName" required></div>
+      <div class="form-group"><label>Mobile Number</label><input type="tel" id="cfPhone" required></div>
+      <div class="form-group"><label>Message</label><textarea id="cfMessage" required placeholder="Write your question..."></textarea></div>
+      <button type="submit" class="btn btn-primary btn-block" id="cfSubmit">Send Message</button>
     </form>
   </div>
 </div>
@@ -78,15 +77,41 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js" onerror="nurevaRetryLoad()"></script>
-<script src="firebase-config.js?v=38" onerror="nurevaRetryLoad()"></script>
-<script src="store.js?v=38" onerror="nurevaRetryLoad()"></script>
-<script src="site.js?v=38"></script>
+<script src="firebase-config.js?v=39" onerror="nurevaRetryLoad()"></script>
+<script src="store.js?v=39" onerror="nurevaRetryLoad()"></script>
+<script src="site.js?v=39"></script>
 <script>
   NurevaStore.ready.then(() => { applySettings(); renderFooter(); });
+
+  /* Sends the message into the same live-chat system used by the admin
+     panel (admin-chat.html), so it actually reaches the shop owner instead
+     of just showing a confirmation toast. Re-uses an existing chat id for
+     this browser if one exists (e.g. from the chat widget), otherwise
+     starts a new chat. */
   document.getElementById("contactForm").addEventListener("submit", (e) => {
     e.preventDefault();
-    toast("Your message has been sent. Thank you!");
-    e.target.reset();
+    const name = document.getElementById("cfName").value.trim();
+    const phone = document.getElementById("cfPhone").value.trim();
+    const message = document.getElementById("cfMessage").value.trim();
+    const submitBtn = document.getElementById("cfSubmit");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Sending...";
+
+    const fullMessage = "📞 " + phone + "\n\n" + message;
+    const existingChatId = NurevaStore.Chat.getMyChatId();
+    const sendPromise = existingChatId
+      ? NurevaStore.Chat.sendMessage(existingChatId, "customer", fullMessage)
+      : NurevaStore.Chat.start(name, "").then(chatId => NurevaStore.Chat.sendMessage(chatId, "customer", fullMessage));
+
+    sendPromise.then(() => {
+      toast("Your message has been sent. Thank you!");
+      e.target.reset();
+    }).catch(() => {
+      toast("Could not send your message. Please try again or call us directly.");
+    }).finally(() => {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Send Message";
+    });
   });
 </script>
 </body>
