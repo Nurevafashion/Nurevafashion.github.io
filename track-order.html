@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Track Order — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=40">
+<link rel="stylesheet" href="style.css?v=41">
 <style>
   .track-wrap { max-width: 480px; margin: 0 auto; padding: 30px 20px 60px; box-sizing: border-box; }
   .track-order-card { background: var(--white); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); margin-bottom: 12px; }
@@ -114,9 +114,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js" onerror="nurevaRetryLoad()"></script>
-<script src="firebase-config.js?v=40" onerror="nurevaRetryLoad()"></script>
-<script src="store.js?v=40" onerror="nurevaRetryLoad()"></script>
-<script src="site.js?v=40"></script>
+<script src="firebase-config.js?v=41" onerror="nurevaRetryLoad()"></script>
+<script src="store.js?v=41" onerror="nurevaRetryLoad()"></script>
+<script src="site.js?v=41"></script>
 <script>
   const trackResultsEl = document.getElementById("trackResults");
   const trackSubtitle = document.getElementById("trackSubtitle");
@@ -182,29 +182,38 @@
     renderOrderList(NurevaStore.Orders.byCustomer(currentUid, phone));
   }
 
+  // Registered immediately (not inside NurevaStore.ready.then) because
+  // Firebase Auth resolves the signed-in user's session on its own, and
+  // fires only ONCE for the initial state. If this listener were added
+  // only after waiting on ready (products/covers/news/settings all
+  // syncing first), that first firing — telling us who's logged in —
+  // would already have happened and been missed, silently leaving the
+  // page thinking nobody is logged in.
+  NurevaStore.Customer.onAuthChange(user => {
+    if (user) {
+      guestLookupWrap.style.display = "none";
+      trackSubtitle.textContent = "Here are your orders and their current status";
+      NurevaStore.Customer.getProfile().then(profile => {
+        if (profile) {
+          showOrdersForPhone(profile.phone || "", user.uid);
+        } else {
+          trackResultsEl.innerHTML = `<div class="empty-state"><h3>No mobile number on file</h3><p>Add your mobile number in Account settings to see your orders here.</p></div>`;
+        }
+      }).catch(() => {
+        trackResultsEl.innerHTML = `<div class="empty-state"><h3>Could not load your orders</h3><p>Please check your connection and reload the page.</p></div>`;
+      });
+    } else {
+      trackSubtitle.textContent = "Log in to see your orders automatically";
+      trackResultsEl.innerHTML = `<div class="empty-state"><h3>Not logged in</h3><p>Log in to your account to see your orders here automatically.</p><a href="account.html" class="btn btn-primary" style="margin-top:14px">Log In / Sign Up</a></div>`;
+      guestLookupWrap.style.display = "block";
+    }
+  });
+
   NurevaStore.ready.then(() => {
     applySettings(); renderFooter();
 
     // Re-render live whenever order data changes (status updates, cancellations, etc.)
     NurevaStore.onChange(() => { if (currentPhone || currentUid) renderOrderList(NurevaStore.Orders.byCustomer(currentUid, currentPhone)); });
-
-    NurevaStore.Customer.onAuthChange(user => {
-      if (user) {
-        guestLookupWrap.style.display = "none";
-        trackSubtitle.textContent = "Here are your orders and their current status";
-        NurevaStore.Customer.getProfile().then(profile => {
-          if (profile) {
-            showOrdersForPhone(profile.phone || "", user.uid);
-          } else {
-            trackResultsEl.innerHTML = `<div class="empty-state"><h3>No mobile number on file</h3><p>Add your mobile number in Account settings to see your orders here.</p></div>`;
-          }
-        });
-      } else {
-        trackSubtitle.textContent = "Log in to see your orders automatically";
-        trackResultsEl.innerHTML = `<div class="empty-state"><h3>Not logged in</h3><p>Log in to your account to see your orders here automatically.</p><a href="account.html" class="btn btn-primary" style="margin-top:14px">Log In / Sign Up</a></div>`;
-        guestLookupWrap.style.display = "block";
-      }
-    });
   });
 
   document.getElementById("guestLookupToggle").addEventListener("click", () => {
