@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Track Order — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=39">
+<link rel="stylesheet" href="style.css?v=40">
 <style>
   .track-wrap { max-width: 480px; margin: 0 auto; padding: 30px 20px 60px; box-sizing: border-box; }
   .track-order-card { background: var(--white); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); margin-bottom: 12px; }
@@ -114,14 +114,15 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js" onerror="nurevaRetryLoad()"></script>
-<script src="firebase-config.js?v=39" onerror="nurevaRetryLoad()"></script>
-<script src="store.js?v=39" onerror="nurevaRetryLoad()"></script>
-<script src="site.js?v=39"></script>
+<script src="firebase-config.js?v=40" onerror="nurevaRetryLoad()"></script>
+<script src="store.js?v=40" onerror="nurevaRetryLoad()"></script>
+<script src="site.js?v=40"></script>
 <script>
   const trackResultsEl = document.getElementById("trackResults");
   const trackSubtitle = document.getElementById("trackSubtitle");
   const guestLookupWrap = document.getElementById("guestLookupWrap");
   let currentPhone = null;
+  let currentUid = null;
 
   const CANCELLABLE_STATUSES = ["New", "Processing"];
 
@@ -175,24 +176,25 @@
     });
   }
 
-  function showOrdersForPhone(phone) {
+  function showOrdersForPhone(phone, uid) {
     currentPhone = phone;
-    renderOrderList(NurevaStore.Orders.byPhone(phone));
+    currentUid = uid || null;
+    renderOrderList(NurevaStore.Orders.byCustomer(currentUid, phone));
   }
 
   NurevaStore.ready.then(() => {
     applySettings(); renderFooter();
 
     // Re-render live whenever order data changes (status updates, cancellations, etc.)
-    NurevaStore.onChange(() => { if (currentPhone) renderOrderList(NurevaStore.Orders.byPhone(currentPhone)); });
+    NurevaStore.onChange(() => { if (currentPhone || currentUid) renderOrderList(NurevaStore.Orders.byCustomer(currentUid, currentPhone)); });
 
     NurevaStore.Customer.onAuthChange(user => {
       if (user) {
         guestLookupWrap.style.display = "none";
         trackSubtitle.textContent = "Here are your orders and their current status";
         NurevaStore.Customer.getProfile().then(profile => {
-          if (profile && profile.phone) {
-            showOrdersForPhone(profile.phone);
+          if (profile) {
+            showOrdersForPhone(profile.phone || "", user.uid);
           } else {
             trackResultsEl.innerHTML = `<div class="empty-state"><h3>No mobile number on file</h3><p>Add your mobile number in Account settings to see your orders here.</p></div>`;
           }
@@ -212,7 +214,7 @@
     e.preventDefault();
     const phone = document.getElementById("guestPhone").value.trim();
     trackSubtitle.textContent = "Orders for " + phone;
-    showOrdersForPhone(phone);
+    showOrdersForPhone(phone, null);
   });
 </script>
 </body>

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkout — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=39">
+<link rel="stylesheet" href="style.css?v=40">
 <style>
   .checkout-wrap { display:grid; grid-template-columns:1.4fr 1fr; gap:30px; }
   .order-box { background:var(--white); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); height:fit-content; }
@@ -83,9 +83,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js" onerror="nurevaRetryLoad()"></script>
-<script src="firebase-config.js?v=39" onerror="nurevaRetryLoad()"></script>
-<script src="store.js?v=39" onerror="nurevaRetryLoad()"></script>
-<script src="site.js?v=39"></script>
+<script src="firebase-config.js?v=40" onerror="nurevaRetryLoad()"></script>
+<script src="store.js?v=40" onerror="nurevaRetryLoad()"></script>
+<script src="site.js?v=40"></script>
 <script>
   /* Same line-item key cart.html uses, so a selection made there ("mark
      items to buy") maps back to the exact cart rows here. */
@@ -130,8 +130,20 @@
       fee = updateTotals();
     }));
 
-    document.getElementById("checkoutForm").addEventListener("submit", (e) => {
-      e.preventDefault();
+    // Prefill from the logged-in customer's saved profile, so the number
+    // typed here matches their account and Tracking can find the order.
+    // Still fully editable in case they want to ship somewhere else.
+    NurevaStore.Customer.onAuthChange(user => {
+      if (!user) return;
+      NurevaStore.Customer.getProfile().then(profile => {
+        if (!profile) return;
+        if (profile.name) document.getElementById("custName").value = profile.name;
+        if (profile.phone) document.getElementById("custPhone").value = profile.phone;
+        if (profile.address) document.getElementById("custAddress").value = profile.address;
+      });
+    });
+
+    document.getElementById("checkoutForm").addEventListener("submit", (e) => {      e.preventDefault();
       const order = {
         customer: {
           name: document.getElementById("custName").value,

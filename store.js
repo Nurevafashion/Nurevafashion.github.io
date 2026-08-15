@@ -147,6 +147,15 @@ const NurevaStore = (() => {
   };
 
   /* ---------- Orders ---------- */
+  /* Reliable matching for a customer's own orders. Matching only by the
+     phone number typed at checkout is fragile — spacing, +880 vs 0, stray
+     characters, or simply typing a different number than the one saved
+     on the account would silently hide orders from Tracking. Orders.add()
+     also stores customerUid when the shopper is logged in, and byCustomer()
+     prefers that exact link, falling back to a digits-only phone
+     comparison for guest orders / older records. */
+  function normPhone(p) { return String(p || "").replace(/\D/g, "").replace(/^880/, "").replace(/^0/, ""); }
+
   const Orders = {
     all: () => cache.orders,
     byPhone: (phone) => {
@@ -154,7 +163,19 @@ const NurevaStore = (() => {
       if (!p) return [];
       return cache.orders.filter(o => o.customer && (o.customer.phone || "").trim() === p);
     },
-    add: (order) => db.collection("orders").add({ ...order, date: Date.now(), status: "New" }),
+    byCustomer: (uid, phone) => {
+      const np = normPhone(phone);
+      return cache.orders.filter(o =>
+        (uid && o.customerUid === uid) ||
+        (np && o.customer && normPhone(o.customer.phone) === np)
+      );
+    },
+    add: (order) => {
+      const user = auth.currentUser;
+      const payload = { ...order, date: Date.now(), status: "New" };
+      if (user && user.email !== ADMIN_EMAIL) payload.customerUid = user.uid;
+      return db.collection("orders").add(payload);
+    },
     updateStatus: (id, status) => db.collection("orders").doc(id).update({ status }),
     remove: (id) => db.collection("orders").doc(id).delete(),
   };
