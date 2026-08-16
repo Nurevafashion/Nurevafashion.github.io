@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Account — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=44">
+<link rel="stylesheet" href="style.css?v=48">
 <style>
   .account-wrap { max-width: 460px; margin: 0 auto; padding: 30px 20px 60px; }
   .auth-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
@@ -23,11 +23,33 @@
   .account-link .txt strong { display: block; font-size: 0.95rem; }
   .account-link .txt span { color: var(--mauve); font-size: 0.8rem; }
   .order-mini { background: var(--white); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); margin-bottom: 10px; font-size: 0.88rem; }
-  .profile-actions-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-  .btn-mini { flex: 1; min-width: 90px; border: 1.5px solid rgba(59,31,50,0.25); background: var(--white); color: var(--primary); font-size: 0.78rem; font-weight: 600; padding: 8px 6px; border-radius: var(--radius); text-align: center; white-space: nowrap; }
-  .btn-mini:active { background: rgba(59,31,50,0.06); }
-  .btn-mini-danger { border-color: rgba(162,59,59,0.35); color: var(--danger); }
-  .btn-mini-danger:active { background: rgba(162,59,59,0.06); }
+  .profile-actions-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .btn-mini {
+    border: none;
+    background: linear-gradient(180deg, #FBF7F2 0%, #F3ECE4 100%);
+    box-shadow: inset 0 0 0 1px rgba(59,31,50,0.1), 0 1px 2px rgba(59,31,50,0.06);
+    color: var(--primary);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 12px 8px;
+    border-radius: 10px;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.25;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    transition: transform 0.1s, box-shadow 0.15s;
+  }
+  .btn-mini:active { transform: scale(0.98); box-shadow: inset 0 0 0 1px rgba(59,31,50,0.18); }
+  .btn-mini-danger {
+    background: linear-gradient(180deg, #FFF5F5 0%, #FCE9E9 100%);
+    box-shadow: inset 0 0 0 1px rgba(162,59,59,0.18), 0 1px 2px rgba(162,59,59,0.05);
+    color: var(--danger);
+  }
+  .btn-mini-danger:active { box-shadow: inset 0 0 0 1px rgba(162,59,59,0.3); }
 </style>
 </head>
 <body>
@@ -130,10 +152,10 @@
   <div id="loggedInView" style="display:none">
     <div class="profile-card">
       <div class="profile-actions-row">
-        <button class="btn-mini" id="openProfileEditBtn">✏️ Profile Edit</button>
-        <button class="btn-mini" id="editAddressBtn">📍 Location Edit</button>
-        <button class="btn-mini" id="openPasswordEditBtn">🔑 Change Password</button>
-        <button class="btn-mini btn-mini-danger" id="logoutBtn">🚪 Log Out</button>
+        <button class="btn-mini" id="openProfileEditBtn">Profile Edit</button>
+        <button class="btn-mini" id="editAddressBtn">Location Edit</button>
+        <button class="btn-mini" id="openPasswordEditBtn">Change Password</button>
+        <button class="btn-mini btn-mini-danger" id="logoutBtn">Log Out</button>
       </div>
 
       <h3 id="profName">—</h3>
@@ -215,9 +237,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js" onerror="nurevaRetryLoad()"></script>
-<script src="firebase-config.js?v=44" onerror="nurevaRetryLoad()"></script>
-<script src="store.js?v=44" onerror="nurevaRetryLoad()"></script>
-<script src="site.js?v=44"></script>
+<script src="firebase-config.js?v=48" onerror="nurevaRetryLoad()"></script>
+<script src="store.js?v=48" onerror="nurevaRetryLoad()"></script>
+<script src="site.js?v=48"></script>
 <script>
   NurevaStore.ready.then(() => { applySettings(); renderFooter(); });
 

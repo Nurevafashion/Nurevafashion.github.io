@@ -118,7 +118,7 @@ function renderCovers() {
   if (!wrap) return;
   const covers = NurevaStore.Covers.all();
   if (!covers.length) { wrap.innerHTML = ""; return; }
-  const coverLinks = ["products.html?cat=Nureva%20Signature", "offers.html"];
+  const coverLinks = ["products.html?cat=Nureva%20Signature", "products.html?cat=Nureva%20Classic"];
   wrap.innerHTML = covers.map((c, i) => {
     const link = coverLinks[i] || "products.html";
     return `

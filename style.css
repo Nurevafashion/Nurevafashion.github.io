@@ -70,14 +70,14 @@ nav.main-nav a::after { content: ""; position: absolute; left: 0; bottom: -2px; 
 nav.main-nav a:hover::after, nav.main-nav a.active::after { width: 100%; }
 nav.main-nav a.active { color: var(--primary); }
 
-.header-actions { display: flex; align-items: center; gap: 14px; }
-.icon-btn { background: none; border: none; color: var(--ink); font-size: 1.15rem; padding: 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.header-actions { display: flex; align-items: center; gap: 6px; }
+.icon-btn { background: none; border: none; color: var(--primary); font-size: 1.15rem; padding: 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .icon-btn:hover { background: rgba(201, 160, 99, 0.15); }
-.icon-btn-round { width: 40px; height: 40px; border: 1.5px solid rgba(59,31,50,0.2); color: var(--primary); }
-.icon-btn-round:hover { background: rgba(201, 160, 99, 0.15); border-color: var(--gold); }
+.icon-btn-round { width: 42px; height: 42px; border: none; color: var(--primary); background: none; }
+.icon-btn-round:hover, .icon-btn-round:active { background: rgba(59,31,50,0.06); }
 
-.menu-toggle { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--primary); border: none; color: var(--ivory); }
-.menu-toggle:hover { background: var(--primary-light); }
+.menu-toggle { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 50%; background: none; border: none; color: var(--primary); }
+.menu-toggle:hover, .menu-toggle:active { background: rgba(59,31,50,0.06); }
 
 .search-panel { display: none; border-top: 1px solid rgba(59,31,50,0.1); background: var(--white); }
 .search-panel.open { display: block; }
