@@ -250,7 +250,11 @@ function renderBanners() {
     const file = e.target.files[0];
     if (!file) return;
     try {
-      const compressed = await NurevaStore.compressImage(file, 900, 0.7);
+      // Slightly smaller/more compressed than before — these display at
+      // well under their original size on a phone screen anyway, and a
+      // lighter payload means the Firestore document (and therefore the
+      // homepage) loads noticeably faster on a mobile connection.
+      const compressed = await NurevaStore.compressImage(file, 760, 0.62);
       const arr = NurevaStore.Covers.all().slice();
       const i = Number(inp.dataset.i);
       arr[i] = { ...(arr[i] || {}), image: compressed, link: COVER_LINKS[i] };

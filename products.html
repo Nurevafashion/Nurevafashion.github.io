@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>All Products — Nureva Fashion</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=48">
+<link rel="stylesheet" href="style.css?v=50">
 </head>
 <body>
 
@@ -60,6 +60,23 @@
     <p>Browse the full Nureva Fashion collection</p>
   </div>
 </div>
+<script>
+  /* Set the correct heading immediately from the URL — this needs no
+     Firestore data at all, so it must not wait on NurevaStore.ready.
+     Otherwise the page would flash "All Products" first and only switch
+     to the right category name once the (possibly slow) product sync
+     finishes, which is confusing on a slow connection. */
+  (function () {
+    const params = new URLSearchParams(location.search);
+    const cat = params.get("cat");
+    const filter = params.get("filter");
+    let title = "All Products";
+    if (cat) title = cat;
+    else if (filter === "new") title = "New Arrivals";
+    document.getElementById("pageTitle").textContent = title;
+    document.title = title + " — Nureva Fashion";
+  })();
+</script>
 
 <div class="container">
   <div class="filter-bar" id="filterBar"></div>
@@ -87,9 +104,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js" onerror="nurevaRetryLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js" onerror="nurevaRetryLoad()"></script>
-<script src="firebase-config.js?v=48" onerror="nurevaRetryLoad()"></script>
-<script src="store.js?v=48" onerror="nurevaRetryLoad()"></script>
-<script src="site.js?v=48"></script>
+<script src="firebase-config.js?v=50" onerror="nurevaRetryLoad()"></script>
+<script src="store.js?v=50" onerror="nurevaRetryLoad()"></script>
+<script src="site.js?v=50"></script>
 <script>
   function renderProductsPage() {
     applySettings();
@@ -113,7 +130,10 @@
     renderProductGrid("productGrid", list, "No products have been added to this category yet.");
     renderFooter();
   }
-  NurevaStore.ready.then(renderProductsPage);
+  // Only wait on products + settings (what this page actually needs) —
+  // not covers/news too, so a category page doesn't sit idle behind
+  // collections it never displays.
+  Promise.all([NurevaStore.readyProducts, NurevaStore.readySettings]).then(renderProductsPage);
   NurevaStore.onChange(renderProductsPage);
 </script>
 </body>

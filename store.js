@@ -72,26 +72,38 @@ const NurevaStore = (() => {
   const listeners = [];
   let resolveReady;
   const ready = new Promise(res => { resolveReady = res; });
+  /* Per-collection ready promises. Covers/news/settings are tiny
+     documents that sync almost instantly, but products (many items,
+     each with photos) can take noticeably longer on a slow connection.
+     Pages that only need the fast collections (e.g. the homepage hero,
+     or a category page's title/heading) can await just those instead of
+     the combined `ready`, so the cover photos and page title show up
+     immediately instead of waiting behind the whole product catalogue. */
+  let resolveReadyProducts, resolveReadyCovers, resolveReadyNews, resolveReadySettings;
+  const readyProducts = new Promise(res => { resolveReadyProducts = res; });
+  const readyCovers = new Promise(res => { resolveReadyCovers = res; });
+  const readyNews = new Promise(res => { resolveReadyNews = res; });
+  const readySettings = new Promise(res => { resolveReadySettings = res; });
   function checkReady() { if (Object.values(flags).every(Boolean)) resolveReady(); }
   function notify() { listeners.forEach(fn => { try { fn(); } catch (e) { console.error(e); } }); }
   function onChange(fn) { listeners.push(fn); }
 
   db.collection("products").onSnapshot(
-    snap => { cache.products = snap.docs.map(d => ({ id: d.id, ...d.data() })); flags.products = true; checkReady(); notify(); },
-    err => { console.error("products sync error:", err); flags.products = true; checkReady(); }
+    snap => { cache.products = snap.docs.map(d => ({ id: d.id, ...d.data() })); flags.products = true; checkReady(); resolveReadyProducts(); notify(); },
+    err => { console.error("products sync error:", err); flags.products = true; checkReady(); resolveReadyProducts(); }
   );
   db.collection("banners").doc("main").onSnapshot(
-    doc => { cache.covers = doc.exists ? (doc.data().covers || []) : []; flags.covers = true; checkReady(); notify(); },
-    err => { console.error("covers sync error:", err); flags.covers = true; checkReady(); }
+    doc => { cache.covers = doc.exists ? (doc.data().covers || []) : []; flags.covers = true; checkReady(); resolveReadyCovers(); notify(); },
+    err => { console.error("covers sync error:", err); flags.covers = true; checkReady(); resolveReadyCovers(); }
   );
   db.collection("news").orderBy("date", "desc").onSnapshot(
-    snap => { cache.news = snap.docs.map(d => ({ id: d.id, ...d.data() })); flags.news = true; checkReady(); notify(); },
-    err => { console.error("news sync error:", err); flags.news = true; checkReady(); }
+    snap => { cache.news = snap.docs.map(d => ({ id: d.id, ...d.data() })); flags.news = true; checkReady(); resolveReadyNews(); notify(); },
+    err => { console.error("news sync error:", err); flags.news = true; checkReady(); resolveReadyNews(); }
   );
   db.collection("settings").doc("general").onSnapshot(
     doc => {
       cache.settings = doc.exists ? { ...defaultSettings(), ...doc.data() } : defaultSettings();
-      flags.settings = true; checkReady(); notify();
+      flags.settings = true; checkReady(); resolveReadySettings(); notify();
       /* Durable fallback: cache the last successfully-synced contact
          numbers in localStorage. If a future page load's live Firestore
          sync is delayed/fails (flaky mobile network), the Call/WhatsApp
@@ -102,7 +114,7 @@ const NurevaStore = (() => {
         if (cache.settings.whatsapp) localStorage.setItem("nurevaLastWhatsapp", cache.settings.whatsapp);
       } catch (e) {}
     },
-    err => { console.error("settings sync error:", err); flags.settings = true; checkReady(); }
+    err => { console.error("settings sync error:", err); flags.settings = true; checkReady(); resolveReadySettings(); }
   );
   db.collection("orders").orderBy("date", "desc").onSnapshot(
     snap => { cache.orders = snap.docs.map(d => ({ id: d.id, ...d.data() })); notify(); },
@@ -318,5 +330,5 @@ const NurevaStore = (() => {
     return batch.commit();
   }
 
-  return { CATEGORIES, ready, isReady: () => Object.values(flags).every(Boolean), onChange, Products, Covers, News, Settings, Orders, Admin, Customer, Chat, placeholderImage, compressImage, seedDemoData };
+  return { CATEGORIES, ready, readyProducts, readyCovers, readyNews, readySettings, isReady: () => Object.values(flags).every(Boolean), onChange, Products, Covers, News, Settings, Orders, Admin, Customer, Chat, placeholderImage, compressImage, seedDemoData };
 })();
