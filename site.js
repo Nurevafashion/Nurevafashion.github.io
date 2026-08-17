@@ -192,6 +192,42 @@ function applySettings() {
   document.querySelectorAll("[data-site-address]").forEach(el => el.textContent = s.address || "");
   document.querySelectorAll("[data-site-phone]").forEach(el => { if (s.phone) { el.textContent = s.phone; el.href = "tel:" + s.phone; } });
   document.querySelectorAll("[data-tagline]").forEach(el => el.textContent = s.tagline || "");
+  initOfferPopup();
+}
+
+/* ---------- offer popup badge (floats bottom-left, 4s after page load) ---------- */
+let offerPopupInitiated = false;
+function initOfferPopup() {
+  if (offerPopupInitiated) return; // applySettings() runs more than once per page — only set the timer up once
+  if (/offers\.html$/.test(location.pathname)) return; // no point popping up on the Offers page itself
+  const store = getNurevaStore();
+  if (!store) return;
+  offerPopupInitiated = true;
+
+  store.readyCovers.then(() => {
+    const badge = store.Covers.getOfferBadge();
+    if (!badge) return; // admin hasn't uploaded one — popup stays off
+    try { if (sessionStorage.getItem("nurevaOfferPopupDismissed")) return; } catch (e) {}
+
+    setTimeout(() => {
+      const el = document.createElement("div");
+      el.className = "offer-popup";
+      el.innerHTML = `
+        <button type="button" class="offer-popup-close" aria-label="Close">✕</button>
+        <img src="${badge}" alt="Special Offer">
+      `;
+      document.body.appendChild(el);
+      requestAnimationFrame(() => el.classList.add("show"));
+
+      el.querySelector("img").addEventListener("click", () => { location.href = "offers.html"; });
+      el.querySelector(".offer-popup-close").addEventListener("click", (e) => {
+        e.stopPropagation();
+        el.classList.remove("show");
+        setTimeout(() => el.remove(), 250);
+        try { sessionStorage.setItem("nurevaOfferPopupDismissed", "1"); } catch (err) {}
+      });
+    }, 4000);
+  });
 }
 function renderFooter(minimal) {
   const el = document.getElementById("siteFooter");

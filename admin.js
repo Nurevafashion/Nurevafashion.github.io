@@ -231,13 +231,13 @@ function renderImagePreview() {
 }
 
 /* ---------- Covers (2 fixed homepage covers: cover 1 -> Nureva Signature, cover 2 -> Offers) ---------- */
-const COVER_LINKS = ["products.html?cat=Nureva%20Signature", "offers.html"];
+const COVER_LINKS = ["products.html?cat=Nureva%20Signature", "products.html?cat=Nureva%20Classic"];
 function renderBanners() {
   const covers = NurevaStore.Covers.all();
   const grid = document.getElementById("bannerGrid");
   grid.innerHTML = [0, 1].map(i => {
     const c = covers[i] || {};
-    const dest = i === 0 ? "Nureva Signature" : "Offers";
+    const dest = i === 0 ? "Nureva Signature" : "Nureva Classic";
     return `
     <div class="banner-slot">
       <label>Cover ${i + 1} <small style="font-weight:400;color:#8A5875">(opens ${dest} when clicked)</small></label>
@@ -263,6 +263,45 @@ function renderBanners() {
       toastAdmin("Cover image updated");
     } catch (err) { alert(err.message); }
   }));
+
+  renderOfferBadge();
+}
+
+/* ---------- Offer popup badge (floats on the homepage after 4s) ---------- */
+function renderOfferBadge() {
+  const grid = document.getElementById("offerBadgeGrid");
+  if (!grid) return;
+  const badge = NurevaStore.Covers.getOfferBadge();
+  grid.innerHTML = `
+    <div class="banner-slot">
+      <label>Popup Badge <small style="font-weight:400;color:#8A5875">(opens Offers page when tapped)</small></label>
+      <div class="preview" style="background:repeating-conic-gradient(#f2f2f2 0% 25%, #ffffff 0% 50%) 50% / 16px 16px;">
+        ${badge ? `<img src="${badge}" style="object-fit:contain">` : `<span style="color:#8A5875;font-size:0.85rem">No badge uploaded — popup is off</span>`}
+      </div>
+      <input type="file" accept="image/*" id="offerBadgeInput">
+      ${badge ? `<button type="button" class="btn btn-outline" id="offerBadgeRemove" style="margin-top:8px;width:100%">Remove Badge (turn popup off)</button>` : ""}
+    </div>
+  `;
+  document.getElementById("offerBadgeInput").addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      // PNG keeps a transparent background, which these floating badge
+      // graphics (like the sample "Offer price / Shop now" badge) almost
+      // always rely on — JPEG would fill any transparent area solid
+      // white/black and ruin the floating look.
+      const compressed = await NurevaStore.compressImage(file, 400, 0.9, "png");
+      await NurevaStore.Covers.setOfferBadge(compressed);
+      renderOfferBadge();
+      toastAdmin("Offer popup badge updated");
+    } catch (err) { alert(err.message); }
+  });
+  document.getElementById("offerBadgeRemove")?.addEventListener("click", async () => {
+    if (!confirm("Turn off the offer popup?")) return;
+    await NurevaStore.Covers.clearOfferBadge();
+    renderOfferBadge();
+    toastAdmin("Offer popup turned off");
+  });
 }
 
 /* ---------- News ---------- */

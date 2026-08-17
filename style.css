@@ -244,6 +244,26 @@ footer { background: #FFFFFF; color: #000000; margin-top: 40px; border-top: 1px 
 
 /* ---------- floating contact button ---------- */
 .fab-container { position: fixed; right: 20px; bottom: 78px; z-index: 999; width: 60px; height: 58px; pointer-events: none; }
+
+/* ---------- offer popup badge ---------- */
+.offer-popup {
+  position: fixed; left: 16px; bottom: 84px; z-index: 400;
+  width: 130px;
+  opacity: 0; transform: translateY(14px) scale(0.9);
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.offer-popup.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+.offer-popup img { width: 100%; display: block; cursor: pointer; filter: drop-shadow(0 8px 18px rgba(20,10,16,0.28)); }
+.offer-popup-close {
+  position: absolute; top: -8px; right: -8px; width: 24px; height: 24px;
+  border-radius: 50%; border: 1px solid rgba(59,31,50,0.15);
+  background: var(--white); color: var(--primary);
+  font-size: 13px; font-weight: 700; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(20,10,16,0.2);
+  cursor: pointer;
+}
 .fab-container, .fab-container * { pointer-events: none; }
 .fab-container .fab-main, .fab-container .fab-option { pointer-events: auto; }
 

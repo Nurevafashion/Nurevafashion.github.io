@@ -29,7 +29,7 @@ const NurevaStore = (() => {
   }
 
   /* ---------- resize/compress an image → base64 (to store in Firestore) ---------- */
-  function compressImage(file, maxWidth = 800, quality = 0.72) {
+  function compressImage(file, maxWidth = 800, quality = 0.72, format = "jpeg") {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onerror = reject;
@@ -43,7 +43,10 @@ const NurevaStore = (() => {
           const canvas = document.createElement("canvas");
           canvas.width = w; canvas.height = h;
           canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-          resolve(canvas.toDataURL("image/jpeg", quality));
+          // PNG keeps a transparent background (needed for badges/logos);
+          // JPEG (the default) is smaller for regular photos, which have
+          // no transparency to preserve anyway.
+          resolve(format === "png" ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", quality));
         };
         img.src = reader.result;
       };
@@ -67,7 +70,7 @@ const NurevaStore = (() => {
   }
 
   /* ---------- in-memory cache, kept in sync via Firestore realtime listeners ---------- */
-  const cache = { products: [], covers: [], news: [], settings: defaultSettings(), orders: [] };
+  const cache = { products: [], covers: [], offerBadge: "", news: [], settings: defaultSettings(), orders: [] };
   const flags = { products: false, covers: false, news: false, settings: false };
   const listeners = [];
   let resolveReady;
@@ -93,7 +96,12 @@ const NurevaStore = (() => {
     err => { console.error("products sync error:", err); flags.products = true; checkReady(); resolveReadyProducts(); }
   );
   db.collection("banners").doc("main").onSnapshot(
-    doc => { cache.covers = doc.exists ? (doc.data().covers || []) : []; flags.covers = true; checkReady(); resolveReadyCovers(); notify(); },
+    doc => {
+      const data = doc.exists ? doc.data() : {};
+      cache.covers = data.covers || [];
+      cache.offerBadge = data.offerBadge || "";
+      flags.covers = true; checkReady(); resolveReadyCovers(); notify();
+    },
     err => { console.error("covers sync error:", err); flags.covers = true; checkReady(); resolveReadyCovers(); }
   );
   db.collection("news").orderBy("date", "desc").onSnapshot(
@@ -142,7 +150,12 @@ const NurevaStore = (() => {
   /* ---------- Covers (2 fixed homepage covers, each with its own link) ---------- */
   const Covers = {
     all: () => cache.covers,
-    set: (arr) => db.collection("banners").doc("main").set({ covers: arr }),
+    // merge:true — this doc also holds the offer popup badge, so saving
+    // the two cover photos must not wipe that field out (and vice versa).
+    set: (arr) => db.collection("banners").doc("main").set({ covers: arr }, { merge: true }),
+    getOfferBadge: () => cache.offerBadge,
+    setOfferBadge: (base64) => db.collection("banners").doc("main").set({ offerBadge: base64 }, { merge: true }),
+    clearOfferBadge: () => db.collection("banners").doc("main").set({ offerBadge: "" }, { merge: true }),
   };
 
   /* ---------- News ---------- */
