@@ -504,7 +504,7 @@ function initBottomNav() {
     </a>
     <a href="track-order.html" class="${path === "track-order.html" ? "active" : ""}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-      Tracking
+      My Order
     </a>
     <a href="cart.html" class="${path === "cart.html" ? "active" : ""}" style="position:relative">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-13z"/><path d="M6 6L4 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>

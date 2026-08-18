@@ -247,7 +247,7 @@ footer { background: #FFFFFF; color: #000000; margin-top: 40px; border-top: 1px 
 
 /* ---------- offer popup badge ---------- */
 .offer-popup {
-  position: fixed; left: 16px; bottom: 84px; z-index: 400;
+  position: fixed; left: 6px; bottom: 84px; z-index: 400;
   width: 130px;
   opacity: 0; transform: translateY(14px) scale(0.9);
   pointer-events: none;
